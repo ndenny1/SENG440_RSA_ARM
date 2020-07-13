@@ -1,4 +1,4 @@
-#include "unoptimized_rsa.h"
+#include "rsa.h"
 
 //First two prime numbers (We are using bitwidth 128 bits)
 int P;
