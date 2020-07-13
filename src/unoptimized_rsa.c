@@ -53,6 +53,5 @@ int decrypt(int encoded_message){
 
 // int main(){
 
-<<<<<<< HEAD
 //     return 0;
 //}
