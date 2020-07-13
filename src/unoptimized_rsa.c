@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <math.h>
-#include "rsa.h"
+#include "unoptimized_rsa.h"
 
 //First two prime numbers (We are using bitwidth 128 bits)
 int P;
@@ -21,26 +19,26 @@ bool isPrime(int a){
 int generatePrimes(){
     	do{
             P = rand() % 32767;	
-        }while(!isprime(P));
+        }while(!isPrime(P));
 	    do{	
             Q = rand() % 32767;	
-        }while(!isprime(Q));
-	return;
+        }while(!isPrime(Q));
+	return 0;
 }
 
 //used for checking relative primes
 int greatestCommonDenom(int a, int b){
     int i;
     int greatest;
-	for(i = 1; i <= a && i <= b; ++i) {
-		if(a % i == 0 && b % i == 0) {greatest = i;}
-	}
-	return gcd;
+    for(i = 1; i <= a && i <= b; ++i) {
+	    if(a % i == 0 && b % i == 0) {greatest = i;}
+    }
+    return greatest;
 }
 
 //Used for checking that E and (P-1)(Q-1) are not relatively prime
 bool isRelativelyPrime(int a, int b){
-    if (gcd(a,b) == 1) return 1;
+    if (greatestCommonDenom(a,b) == 1) return 1;
 	return 0;
 }
 
@@ -73,7 +71,7 @@ int mmm(int X, int Y, int M, int bitLength){
         n = T ^ (Xi & Y);
         T = (T + (Xi*Y) + (n*M)) >> 1;
     }
-    if(T >= M ){T = T - M};
+    if(T >= M ){T = T - M;};
     return T;
 }
 
