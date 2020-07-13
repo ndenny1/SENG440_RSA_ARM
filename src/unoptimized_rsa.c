@@ -1,5 +1,4 @@
 #include "rsa.h"
-
 //we will need to store these somewhere in memory then point to them here
 //modulus
 int M;
@@ -54,5 +53,6 @@ int decrypt(int encoded_message){
 
 // int main(){
 
+<<<<<<< HEAD
 //     return 0;
-// }
+//}
