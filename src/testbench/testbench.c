@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include "minunit.h"
-#include "../unoptimized_rsa.h"
+#include "../rsa.h"
 
 int tests_run = 0;
 
