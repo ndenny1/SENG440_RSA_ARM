@@ -89,7 +89,6 @@ int decrypt(int encoded_message){
     return me();
 }
 
-int main(){
-
-    return 0;
-}
+//int main(){
+//    return 0;
+//}

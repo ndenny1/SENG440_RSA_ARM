@@ -10,14 +10,14 @@ int foo = 7;
 int bar = 5;
 
 static char * test_isPrime_p() {
-	int prime = 3650513879;
+	int prime = 1543763561;
 	mu_assert("error, isPrime returned false", isPrime(prime));
 	return 0;
 }
 
 static char * test_isPrime_n() {
-	int composite = 3650513878;
-	mu_assert("error, isPrime returned true", !isPrime(composite));
+	int composite = 1543763562;
+	mu_assert("error, isPrime returned true", isPrime(composite) == false);
 	return 0;
 }
 
@@ -38,9 +38,9 @@ static char * test_isRelativelyPrime_p() {
 }
 
 static char * test_isRelativelyPrime_n() {
-	int a = 655839;
-	int b = 9763;
-	mu_assert("error, isRelativelyPrime returned true", !isRelativelyPrime(a, b));
+	int a = 655838;
+	int b = 9764;
+	mu_assert("error, isRelativelyPrime returned true", isRelativelyPrime(a, b) == false);
 	return 0;
 }
 
@@ -48,7 +48,7 @@ static char * test_mmm() {
 	int a = 4;
 	int b = 7;
 	int m = 15;
-	int bit_length = 8;
+	int bit_length = 4;
 	int expected_result = 13;
 	mu_assert("error, mmm did not return 13", mmm(a, b, m, bit_length) == expected_result);
 	return 0;
