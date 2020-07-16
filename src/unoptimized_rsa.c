@@ -22,13 +22,14 @@ int count_num_bits(int value) {
 int mmm(int X, int Y, int M, int bitLength){
     int T = 0;
     int n = 0;
-    for(int a=0; a <= bitLength-1; a++){
-        int Xi = (X >> a);
-        n = T ^ (Xi & Y);
+    for(int a=0; a < bitLength; a++){
+        int Xi = (X >> a) & 1;
+        n = (T & 1) ^ (Xi & (Y & 1));
         T = (T + (Xi*Y) + (n*M)) >> 1;
     }
     if(T >= M ){T = T - M;}
     return T;
+
 }
 
 //Modular Exponentiation

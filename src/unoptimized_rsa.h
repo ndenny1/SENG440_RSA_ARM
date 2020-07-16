@@ -1,5 +1,4 @@
 /* file: unoptimized_rsa.h */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
