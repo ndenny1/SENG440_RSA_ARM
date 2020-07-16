@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <math.h>
 #include "rsa.h"
 
 //First two prime numbers (We are using bitwidth 128 bits)
@@ -18,13 +16,14 @@ bool isPrime(int a){
 }
 
 //Generates P and Q for RSA
-int generatePrimes(){
+void generatePrimes(){
+        //generate a random number until a prime is found for P and Q
     	do{
             P = rand() % 32767;	
-        }while(!isprime(P));
+        }while(!isPrime(P));
 	    do{	
             Q = rand() % 32767;	
-        }while(!isprime(Q));
+        }while(!isPrime(Q) && (P != Q));
 	return;
 }
 
@@ -35,33 +34,53 @@ int greatestCommonDenom(int a, int b){
 	for(i = 1; i <= a && i <= b; ++i) {
 		if(a % i == 0 && b % i == 0) {greatest = i;}
 	}
-	return gcd;
+	return greatest;
 }
 
 //Used for checking that E and (P-1)(Q-1) are not relatively prime
 bool isRelativelyPrime(int a, int b){
-    if (gcd(a,b) == 1) return 1;
+    if (greatestCommonDenom(a,b) == 1) return 1;
 	return 0;
 }
 
 //Generate E
 void generateE(){
-    E = 0;
+    //find a random prime number
+    do{
+        E = rand() % 32767;	
+    }while(!isPrime(E));
     while(1){
+        //makes sure E is relatively prime
         if(isRelativelyPrime(E, (P - 1)*(Q - 1))){ return;}
+        //use a different prime number is E is not relatively prime
         else{
-            //E = next prime number
+            do{
+                E = rand() % 32767;	
+            }while(!isPrime(E));
         }
     }
 }
 
 //Generate D
-int generateD(){
-    // int X = 0;
-    // int temp = 0;
-    // while(1){
-    //     temp = (X * (P - 1)(Q - 1) + 1)/E
-    // }
+void generateD(){
+    int X = 0;
+    do{
+        X = rand() % 32767;	
+    }while(!isPrime(E));
+    float temp = 0;
+    while(1){
+        temp = (X * (P - 1)(Q - 1) + 1)/E;
+        //make sure this equation produces a whole number
+        if(temp == (int)temp){
+            D = X;
+            return;
+        //if a whole number is not generated, try again
+        } else {
+            do{
+                X = rand() % 32767;	
+            }while(!isPrime(E));
+        }
+    }
 }
 
 //Montgomery Modular Multiplication
@@ -73,23 +92,23 @@ int mmm(int X, int Y, int M, int bitLength){
         n = T ^ (Xi & Y);
         T = (T + (Xi*Y) + (n*M)) >> 1;
     }
-    if(T >= M ){T = T - M};
+    if(T >= M ){T = T - M;}
     return T;
 }
 
 //Modular Exponentiation
-int me(){
-
-}
+// int me(){
+    
+// }
 
 //Functions for easy encryption/decryption of a message
-int encrypt(int message){
-    return  me();
-}
+// int encrypt(int message){
+//     return  1;
+// }
 
-int decrypt(int encoded_message){
-    return me();
-}
+// int decrypt(int encoded_message){
+//     return 1;
+// }
 
 int main(){
 
