@@ -11,7 +11,7 @@
 
 bool isPrime(int a);
 
-int generatePrimes();
+void generatePrimes();
 
 int greatestCommonDenom(int a, int b);
 
@@ -19,12 +19,12 @@ bool isRelativelyPrime(int a, int b);
 
 void generateE();
 
-int generateD();
+void generateD();
 
 int mmm(int X, int Y, int M, int bitlength);
 
-int me();
+// int me();
 
-int encrypt(int message);
+// int encrypt(int message);
 
-int decrypt(int encoded_message);
+// int decrypt(int encoded_message);
