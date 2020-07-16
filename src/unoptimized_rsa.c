@@ -1,4 +1,4 @@
-#include "rsa.h"
+#include "unoptimized_rsa.h"
 
 //First two prime numbers (We are using bitwidth 128 bits)
 int P;
@@ -69,7 +69,7 @@ void generateD(){
     }while(!isPrime(E));
     float temp = 0;
     while(1){
-        temp = (X * (P - 1)(Q - 1) + 1)/E;
+        temp = ((X) * ((P - 1)*(Q - 1)) + 1)/E;
         //make sure this equation produces a whole number
         if(temp == (int)temp){
             D = X;
@@ -87,13 +87,14 @@ void generateD(){
 int mmm(int X, int Y, int M, int bitLength){
     int T = 0;
     int n = 0;
-    for(int a=0; a <= bitLength-1; a++){
-        int Xi = (X >> a);
-        n = T ^ (Xi & Y);
+    for(int a=0; a < bitLength; a++){
+        int Xi = (X >> a) & 1;
+        n = (T & 1) ^ (Xi & (Y & 1));
         T = (T + (Xi*Y) + (n*M)) >> 1;
     }
     if(T >= M ){T = T - M;}
     return T;
+
 }
 
 //Modular Exponentiation
@@ -110,6 +111,6 @@ int mmm(int X, int Y, int M, int bitLength){
 //     return 1;
 // }
 
-//int main(){
+// int main(){
 //    return 0;
-//}
+// }

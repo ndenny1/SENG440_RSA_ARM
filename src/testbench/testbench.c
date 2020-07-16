@@ -1,8 +1,6 @@
 /* file testbench.c */
-
-#include <stdio.h>
 #include "minunit.h"
-#include "../rsa.h"
+#include "../unoptimized_rsa.h"
 
 int tests_run = 0;
 
@@ -64,7 +62,7 @@ static char * all_tests() {
 	return 0;
 }
 
-int main(int argc, char **argv) {
+int main() {
 	char *result = all_tests();
 	if (result != 0) {
 		printf("%s\n", result);
