@@ -103,13 +103,13 @@ int me(int base, int exponent, int modulus){
 }
 
 //Functions for easy encryption/decryption of a message
-// int encrypt(int message){
-//     return  1;
-// }
+int encrypt(int message){
+    return  1;
+}
 
-// int decrypt(int encoded_message){
-//     return 1;
-// }
+int decrypt(int encoded_message){
+    return 1;
+}
 
 // int main(){
 //    return 0;
