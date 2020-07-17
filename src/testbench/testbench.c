@@ -58,6 +58,14 @@ static char * test_me() {
 	return 0;
 }
 
+static char * test_encrypt_decrypt() {
+	int message_to_encrypt = 0xAF0F302B;
+	int encrypted_message = encrypt(message_to_encrypt);
+	int decrypted_message = decrypt(encrypted_message);
+	mu_assert("error, decrypted message does not equal original message", message_to_encrypt == decrypted_message);
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_isPrime_p);
 	mu_run_test(test_isPrime_n);
@@ -66,6 +74,7 @@ static char * all_tests() {
 	mu_run_test(test_isRelativelyPrime_n);
 	mu_run_test(test_mmm);
 	mu_run_test(test_me);
+	mu_run_test(test_encrypt_decrypt);
 	return 0;
 }
 

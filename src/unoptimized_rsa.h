@@ -24,6 +24,6 @@ int mmm(int X, int Y, int M, int bitlength);
 
 int me(int base, int exponent, int modulus);
 
-// int encrypt(int message);
+int encrypt(int message);
 
-// int decrypt(int encoded_message);
+int decrypt(int encoded_message);
