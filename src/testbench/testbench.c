@@ -49,6 +49,15 @@ static char * test_mmm() {
 	return 0;
 }
 
+static char * test_me() {
+	int b = 4;
+	int e = 13;
+	int m = 497;
+	int expected_result = 445;
+	mu_assert("error, me did not return 445", me(b, e, m) == expected_result);
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_isPrime_p);
 	mu_run_test(test_isPrime_n);
@@ -56,6 +65,7 @@ static char * all_tests() {
 	mu_run_test(test_isRelativelyPrime_p);
 	mu_run_test(test_isRelativelyPrime_n);
 	mu_run_test(test_mmm);
+	mu_run_test(test_me);
 	return 0;
 }
 
