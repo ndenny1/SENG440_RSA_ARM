@@ -4,9 +4,6 @@
 
 int tests_run = 0;
 
-int foo = 7;
-int bar = 5;
-
 static char * test_isPrime_p() {
 	int prime = 1543763561;
 	mu_assert("error, isPrime returned false", isPrime(prime));
