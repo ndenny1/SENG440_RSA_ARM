@@ -22,7 +22,7 @@ void generateD();
 
 int mmm(int X, int Y, int M, int bitlength);
 
-// int me();
+int me(int base, int exponent, int modulus);
 
 // int encrypt(int message);
 

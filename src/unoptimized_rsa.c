@@ -98,9 +98,9 @@ int mmm(int X, int Y, int M, int bitLength){
 }
 
 //Modular Exponentiation
-// int me(){
-    
-// }
+int me(int base, int exponent, int modulus){
+	return 0;    
+}
 
 //Functions for easy encryption/decryption of a message
 // int encrypt(int message){
