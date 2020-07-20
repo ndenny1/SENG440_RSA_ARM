@@ -1,86 +1,22 @@
 #include "rsa.h"
 
-//First two prime numbers (We are using bitwidth 128 bits)
-int P;
-int Q;
-
-//Public and private exponents (We are using bitwidth 128 bits)
+//we will need to store these somewhere in memory then point to them here
+//modulus
+int M;
+//secret key
 int D;
+//public key
 int E;
 
-bool isPrime(int a){
-    for(int i = 2; i < a/2; i++){
-		if( a%i == 0 && a != 0) return 0;
-	}
-	return 1;
-}
+//used to count bitlength for Montgomery Modular Multiplication
+int count_num_bits(int value) {
+    int count = 0;
 
-//Generates P and Q for RSA
-void generatePrimes(){
-        //generate a random number until a prime is found for P and Q
-    	do{
-            P = rand() % 32767;	
-        }while(!isPrime(P));
-	    do{	
-            Q = rand() % 32767;	
-        }while(!isPrime(Q) && (P != Q));
-	return;
-}
-
-//used for checking relative primes
-int greatestCommonDenom(int a, int b){
-    int i;
-    int greatest;
-	for(i = 1; i <= a && i <= b; ++i) {
-		if(a % i == 0 && b % i == 0) {greatest = i;}
-	}
-	return greatest;
-}
-
-//Used for checking that E and (P-1)(Q-1) are not relatively prime
-bool isRelativelyPrime(int a, int b){
-    if (greatestCommonDenom(a,b) == 1) return 1;
-	return 0;
-}
-
-//Generate E
-void generateE(){
-    //find a random prime number
-    do{
-        E = rand() % 32767;	
-    }while(!isPrime(E));
-    while(1){
-        //makes sure E is relatively prime
-        if(isRelativelyPrime(E, (P - 1)*(Q - 1))){ return;}
-        //use a different prime number is E is not relatively prime
-        else{
-            do{
-                E = rand() % 32767;	
-            }while(!isPrime(E));
-        }
+    while(value > 0) {
+        count ++;
+        value >>= 1;
     }
-}
-
-//Generate D
-void generateD(){
-    int X = 0;
-    do{
-        X = rand() % 32767;	
-    }while(!isPrime(E));
-    float temp = 0;
-    while(1){
-        temp = (X * (P - 1)(Q - 1) + 1)/E;
-        //make sure this equation produces a whole number
-        if(temp == (int)temp){
-            D = X;
-            return;
-        //if a whole number is not generated, try again
-        } else {
-            do{
-                X = rand() % 32767;	
-            }while(!isPrime(E));
-        }
-    }
+    return count;
 }
 
 //Montgomery Modular Multiplication
@@ -97,20 +33,26 @@ int mmm(int X, int Y, int M, int bitLength){
 }
 
 //Modular Exponentiation
-// int me(){
+int me(int message, int key, int modulus){
     
-// }
+}
 
 //Functions for easy encryption/decryption of a message
-// int encrypt(int message){
-//     return  1;
-// }
-
-// int decrypt(int encoded_message){
-//     return 1;
-// }
-
-int main(){
-
-    return 0;
+int encrypt(int message){
+    //we can probably get rid of this declaration, I was just using it to better understand the algorithm
+    int T = message;
+    //algorithm is  C = T^E mod M (C is cypertext, T is plaintext, E is public key, M is modulus)
+    return  me(T, E, M);
 }
+
+int decrypt(int encoded_message){
+    //we can probably get rid of this declaration, I was just using it to better understand the algorithm
+    int C = encoded_message;
+    //algorithm is  T = C^D mod M (C is cypertext, T is plaintext, D is private key, M is modulus)
+    return me(C, D, M);
+}
+
+// int main(){
+
+//     return 0;
+// }
