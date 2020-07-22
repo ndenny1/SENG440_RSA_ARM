@@ -1,4 +1,4 @@
-#include "rsa.h"
+#include "unoptimized_rsa.h"
 //we will need to store these somewhere in memory then point to them here
 //modulus
 int M;
@@ -34,7 +34,19 @@ int mmm(int X, int Y, int M, int bitLength){
 
 //Modular Exponentiation
 int me(int message, int key, int modulus){
-    
+	if (modulus == 0) {
+		return 0;
+	}
+	int r = 1;
+	message = message % modulus;
+	while (key > 0) {
+		if (key % 2 == 1) {
+			r = (r * message) % modulus;
+		}
+		key = key >> 1;
+		message = (message * message) % modulus;
+	}
+	return r;
 }
 
 //Functions for easy encryption/decryption of a message
@@ -52,7 +64,8 @@ int decrypt(int encoded_message){
     return me(C, D, M);
 }
 
-// int main(){
-
-//     return 0;
-//}
+int main(){
+	int r = me(4, 13, 497);
+	printf("r: %d\n", r);
+	return 0;
+}
