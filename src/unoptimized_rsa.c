@@ -64,8 +64,7 @@ int decrypt(int encoded_message){
     return me(C, D, M);
 }
 
-int main(){
-	int r = me(4, 13, 497);
-	printf("r: %d\n", r);
-	return 0;
-}
+// int main(){
+
+//     return 0;
+//}
