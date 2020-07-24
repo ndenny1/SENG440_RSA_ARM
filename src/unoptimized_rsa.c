@@ -39,17 +39,20 @@ int me(int message, int key, int modulus){
 	}
     int key_bits = count_num_bits(key);
     int mod_bits = count_num_bits(modulus);
-    int r_squared = 1 << 2 * key_bits;
-	int C = mmm(1, r_squared, modulus, 1);
+    int r_squared = 1;
+    for(int a = 0; a < mod_bits*2; a++){
+        r_squared = r_squared * 2 % modulus;
+    }
+	int C = mmm(1, r_squared, modulus, mod_bits);
     int S = mmm(message, r_squared, modulus, mod_bits);
-    for (int i = 0; i < key_bits; i++) {
+    for (int i = 0; i < mod_bits; i++) {
         int key_i = (key >> i) & 1;
         if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
     }
-    C = mmm(C, 1, modulus, mod_bits);
+    C = mmm(1,C, modulus, mod_bits);
 	return C;
 }
 
@@ -69,6 +72,12 @@ int decrypt(int encoded_message){
 }
 
 // int main() {
-    
+//     // hello world
+//     int message = (int)"Hello world";
+//     printf("Initial Message: %d\n", message);
+//     int encoded = encrypt(message);
+//     printf("Encoded Message: %d\n", encoded);
+//     int decoded = decrypt(encoded);
+//     printf("Decoded Message (should be same as initial): %d\n", decoded);
 //     return 0;
-// }
+// }   
