@@ -11,13 +11,12 @@ int E;
 
 //used to count bitlength for Montgomery Modular Multiplication
 int count_num_bits(int value) {
-    int count = 0;
-
-    while(value > 0) {
-        count ++;
-        value >>= 1;
-    }
-    return count;
+	int count = 0;
+	while (value != 0) {
+		value >>= 1;
+		count++;
+	}
+	return count;
 }
 
 //Montgomery Modular Multiplication
@@ -43,8 +42,8 @@ int me(int message, int key, int modulus) {
 	int r_squared = 1 << 2 * key_bits;
 	int C = mmm(1, r_squared, modulus, 1);
 	int S = mmm(message, r_squared, modulus, mod_bits);
-	for (short i = key_bits - 1; i >= 0; i--) {
-		short key_i = (key >> (key_bits - (i + 1))) & 1;
+	for (short i = 0; i < key_bits; i++) {
+		short key_i = (key >> i) & 1;
 		if (key_i == 1) {
 			C = mmm(C, S, modulus, mod_bits);
 		}
