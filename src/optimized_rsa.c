@@ -1,14 +1,11 @@
 #include "unoptimized_rsa.h"
-#include <time.h>
-
 //we will need to store these somewhere in memory then point to them here
 //modulus
-int M;
+int M = 3233;
 //secret key
-int D;
+int D = 2753;
 //public key
-int E;
-
+int E = 17;
 //used to count bitlength for Montgomery Modular Multiplication
 int count_num_bits(int value) {
 	if (!value) return 0;
@@ -39,7 +36,7 @@ int me(int message, int key, int modulus) {
 	if (!modulus) {
 		return 0;
 	}
-
+	int r_squared = 1;
 	// Loop fusion of count_num_bits
 	u_int8_t key_bits = 0, mod_bits = 0;
 	unsigned int u_key = 0, u_modulus = 0;
@@ -59,11 +56,14 @@ int me(int message, int key, int modulus) {
 		if (u_modulus) {
 			u_modulus >>= 1;
 			mod_bits++;
+			r_squared = (r_squared << 1) % modulus;
 		}
 	}
-
-	int r_squared = 1 << 2 * key_bits;
-	int C = mmm(1, r_squared, modulus, 1);
+	u_int8_t a = 0;
+	for(; a < mod_bits + 1; a++) {
+		r_squared = (r_squared << 1) % modulus;
+	}
+	int C = mmm(1, r_squared, modulus, mod_bits);
 	int S = mmm(message, r_squared, modulus, mod_bits);
 	u_int8_t i = 0;
 	for (; i < key_bits; i++){ 
@@ -93,5 +93,12 @@ int decrypt(int encoded_message){
 }
 
 int main() {
-	return 0;
+    // hello world
+    int message = 3231;
+    printf("Initial Message: %d\n", message);
+    int encoded = encrypt(message);
+    printf("Encoded Message: %d\n", encoded);
+    int decoded = decrypt(encoded);
+    printf("Decoded Message (should be same as initial): %d\n", decoded);
+    return 0;
 }
