@@ -38,7 +38,7 @@ int me(int message, int key, int modulus) {
 	}
 	int r_squared = 1;
 	// may need to be changed to u_int16_t if 1024 bit keys are used
-	u_int8_t key_bits = 0, mod_bits = 0;
+	uint8_t key_bits = 0, mod_bits = 0;
 
 	// Loop fusion of count_num_bits;
 	unsigned int u_key = 0, u_modulus = 0;
@@ -61,15 +61,15 @@ int me(int message, int key, int modulus) {
 			r_squared = (r_squared << 1) % modulus;
 		}
 	}
-	u_int8_t a = 0;
+	uint8_t a = 0;
 	for(; a < mod_bits + 1; a++) {
 		r_squared = (r_squared << 1) % modulus;
 	}
 	int C = mmm(1, r_squared, modulus, mod_bits);
 	int S = mmm(message, r_squared, modulus, mod_bits);
-	u_int8_t i = 0;
+	uint8_t i = 0;
 	for (; i < key_bits; i++){ 
-		u_int8_t key_i = (key >> i) & 1;
+		uint8_t key_i = (key >> i) & 1;
 		if (key_i) {
 			C = mmm(C, S, modulus, mod_bits);
 		}
