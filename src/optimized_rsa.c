@@ -37,8 +37,10 @@ int me(int message, int key, int modulus) {
 		return 0;
 	}
 	int r_squared = 1;
-	// Loop fusion of count_num_bits
-	u_int8_t key_bits = 0, mod_bits = 0;
+	// may need to be changed to u_int16_t if 1024 bit keys are used
+	u_int8_t key_bits = 0, mod_bits = 0
+
+	// Loop fusion of count_num_bits;
 	unsigned int u_key = 0, u_modulus = 0;
 	if (key) {
 		u_key = (unsigned int) (key >> 1);
