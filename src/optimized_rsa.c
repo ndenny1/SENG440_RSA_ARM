@@ -11,9 +11,11 @@ int E;
 
 //used to count bitlength for Montgomery Modular Multiplication
 int count_num_bits(int value) {
-	int count = 0;
-	while (value != 0) {
-		value >>= 1;
+	if (!value) return 0;
+	unsigned int local_value = (unsigned int)(value >> 1);
+	int count = 1;
+	while (local_value) {
+		local_value >>= 1;
 		count++;
 	}
 	return count;
@@ -34,17 +36,39 @@ int mmm(int X, int Y, int M, int bitLength){
 }
 
 int me(int message, int key, int modulus) {
-	if (modulus == 0) {
+	if (!modulus) {
 		return 0;
 	}
-	short key_bits = count_num_bits(key);
-	short mod_bits = count_num_bits(modulus);
+
+	// Loop fusion of count_num_bits
+	u_int8_t key_bits = 0, mod_bits = 0;
+	unsigned int u_key = 0, u_modulus = 0;
+	if (key) {
+		u_key = (unsigned int) (key >> 1);
+		key_bits++;
+	}
+	if (modulus) {
+		u_modulus = (unsigned int) (modulus >> 1);
+		mod_bits++;
+	}
+	while (u_key | u_modulus) {
+		if (u_key) {
+			u_key >>= 1;
+			key_bits++;
+		}
+		if (u_modulus) {
+			u_modulus >>= 1;
+			mod_bits++;
+		}
+	}
+
 	int r_squared = 1 << 2 * key_bits;
 	int C = mmm(1, r_squared, modulus, 1);
 	int S = mmm(message, r_squared, modulus, mod_bits);
-	for (short i = 0; i < key_bits; i++) {
-		short key_i = (key >> i) & 1;
-		if (key_i == 1) {
+	u_int8_t i = 0;
+	for (; i < key_bits; i++){ 
+		u_int8_t key_i = (key >> i) & 1;
+		if (key_i) {
 			C = mmm(C, S, modulus, mod_bits);
 		}
 		S = mmm(S, S, modulus, mod_bits);
