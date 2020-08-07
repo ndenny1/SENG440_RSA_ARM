@@ -276,7 +276,7 @@ uint8_t get_bit(uint128_t * x, uint8_t offset) {
 		return (mid1 >> (offset - 32)) & 1;
 	}
 	uint32_t low = x->low;
-	return (low >> y) & 1;
+	return (low >> offset) & 1;
 }
 
 void print_uint128(char * str, uint128_t * x) {
