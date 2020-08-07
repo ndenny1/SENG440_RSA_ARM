@@ -149,16 +149,23 @@ uint128_t * lshift_uint128(uint128_t * x, uint8_t y) {
 	if (y >= 128) {
 		return uint128_init(0, 0, 0, 0);
 	}
+	uint32_t low = x->low;
+	uint32_t mid1 = x->mid1;
+	uint32_t mid2 = x->mid2;
+	uint32_t high = x->high;
 	if (y < 128 && y >= 96) {
-		return rshift_uint128(uint128_init(0, x->low, x->mid1, x->mid2), y - 96);
+		return rshift_uint128(uint128_init(0, low, mid1, mid2), y - 96);
 	}
 	if (y < 96 && y >= 64) {
-		return rshift_uint128(uint128_init(0, 0, x->low, x->mid1), y - 64);
+		return rshift_uint128(uint128_init(0, 0, low, mid1), y - 64);
 	}
 	if (y < 64 && y >= 32) {
-		return rshift_uint128(uint128_init(0, 0, 0, x->mid1), y - 32);
+		return rshift_uint128(uint128_init(0, 0, 0, mid1), y - 32);
 	}
-	return uint128_init(x->low << y, x->mid1 << y, x->mid2 << y, x->high << y);
+	uint32_t last_low = low >> (32 - y);
+	uint32_t last_mid1 = mid1 >> (32 - y);
+	uint32_t last_mid2 = mid2 >> (32 - y);
+	return uint128_init((low << y), (mid1 << y) | last_low, (mid2 << y) | last_mid1, (high << y) | last_mid2);
 }
 uint128_t * and_uint128(uint128_t * x, uint128_t * y) {
 	return uint128_init(x->low & y->low, x->mid1 & y->mid1, x->mid2 & y->mid2, x->high & y->high);
@@ -169,6 +176,109 @@ uint128_t * or_uint128(uint128_t * x, uint128_t * y) {
 uint128_t * xor_uint128(uint128_t * x, uint128_t * y) {
 	return uint128_init(x->low ^ y->low, x->mid1 ^ y->mid1, x->mid2 ^ y->mid2, x->high ^ y->high);
 }
-void print_uint128(uint128_t * x) {
-	printf("%08x %08x %08x %08x\n", x->high, x->mid2, x->mid1, x->low);
+
+uint128_t * mod_uint128(uint128_t * x, uint128_t * y) {
+	if (gt_uint128(y, x)) {
+		return x;
+	}
+	if (equal_uint128(y, cast_to_uint128(1))) {
+		return cast_to_uint128(0);
+	}
+	uint128_t * _x = uint128_init(x->low, x->mid1, x->mid2, x->high);
+	uint128_t * _y = uint128_init(y->low, y->mid1, y->mid2, y->high);
+	uint128_t * half_x = rshift_uint128(_x, 1);
+	uint128_t * largest_y = uint128_init(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0X7FFFFFFF);
+	while (!gte_uint128(_y, half_x) && !gte_uint128(_y, largest_y)) {
+		_y = lshift_uint128(_y, 1);
+	}
+
+	_y = rshift_uint128(_y, 1);
+	
+	while (gt_uint128(_y, y)) {
+		while(gt_uint128(_x, _y)) {
+			_x = sub_uint128(_x, _y);
+		}
+		_y = rshift_uint128(_y, 1);
+	}
+	while (gt_uint128(_x, y)) {
+		_x = sub_uint128(_x, y);
+	}
+	if (equal_uint128(_x, y)) {
+		return cast_to_uint128(0);
+	}
+	return _x;
+}
+
+uint8_t lt_uint128(uint128_t * x, uint128_t * y) {
+	return !(gte_uint128(x, y));
+}
+
+uint8_t uint128_equal_to_zero(uint128_t * x) {
+	return !(uint8_t)(x->low | x->mid1 | x->mid2 | x->high);
+}
+
+uint8_t gte_uint128(uint128_t * x, uint128_t * y) {
+	if (equal_uint128(x, y)) {
+		return 1;
+	}
+	return gt_uint128(x, y);
+}
+
+uint8_t gt_uint128(uint128_t * x, uint128_t * y) {
+	uint32_t x_high = x->high;
+	uint32_t y_high = y->high;
+	if (x_high != y_high) {
+		return x_high > y_high;
+	}
+	uint32_t x_mid2 = x->mid2;
+	uint32_t y_mid2 = y->mid2;
+	if (x_mid2 != y_mid2) {
+		return x_mid2 > y_mid2;
+	}
+	uint32_t x_mid1 = x->mid1;
+	uint32_t y_mid1 = y->mid1;
+	if (x_mid1 != y_mid1) {
+		return x_mid1 > y_mid1;
+	}
+	return x->low > y->low;
+}
+
+uint8_t equal_uint128(uint128_t * x, uint128_t * y) {
+	uint32_t x_high = x->high;
+	uint32_t y_high = y->high;
+	if (x_high != y_high) {
+		return 0;
+	}
+	uint32_t x_mid2 = x->mid2;
+	uint32_t y_mid2 = y->mid2;
+	if (x_mid2 != y_mid2) {
+		return 0;
+	}
+	uint32_t x_mid1 = x->mid1;
+	uint32_t y_mid1 = y->mid1;
+	if (x_mid1 != y_mid1) {
+		return 0;
+	}
+	return x->low == y->low;
+}
+
+uint8_t get_bit(uint128_t * x, uint8_t offset) {
+	uint32_t high = x->high;
+	if (offset < 128 && offset >= 96) {
+		return (high >> (offset - 96)) & 1;
+	}
+	uint32_t mid2 = x->mid2;
+	if (offset < 96 && offset >= 64) {
+		return (mid2 >> (offset - 64)) & 1;
+	}
+	uint32_t mid1 = x->mid1;
+	if (offset < 64 && offset >= 32) {
+		return (mid1 >> (offset - 32)) & 1;
+	}
+	uint32_t low = x->low;
+	return (low >> y) & 1;
+}
+
+void print_uint128(char * str, uint128_t * x) {
+	printf("%s%08x %08x %08x %08x\n", str, x->high, x->mid2, x->mid1, x->low);
 }
