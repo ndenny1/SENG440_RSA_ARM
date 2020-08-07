@@ -3,28 +3,19 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include "int128.h"
 
 #ifndef bool
 	#include <stdbool.h>
 	#define bool	_Bool
 #endif
 
-bool isPrime(int a);
+uint32_t count_num_bits(uint128_t* value);
 
-void generatePrimes();
+uint128_t* mmm(uint128_t* X, uint128_t* Y, uint128_t* M, uint32_t bitLength);
 
-int greatestCommonDenom(int a, int b);
+uint128_t* me(uint128_t* message, uint128_t* key, uint128_t* modulus);
 
-bool isRelativelyPrime(int a, int b);
+uint128_t* encrypt(uint128_t* message);
 
-void generateE();
-
-void generateD();
-
-int mmm(int X, int Y, int M, int bitlength);
-
-int me(int base, int exponent, int modulus);
-
-int encrypt(int message);
-
-int decrypt(int encoded_message);
+uint128_t* decrypt(uint128_t* encoded_message);
