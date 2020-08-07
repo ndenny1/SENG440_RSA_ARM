@@ -10,7 +10,7 @@
 	#define bool	_Bool
 #endif
 
-uint32_t count_num_bits(uint128_t* value);
+uint8_t count_num_bits(uint128_t* value);
 
 uint128_t* mmm(uint128_t* X, uint128_t* Y, uint128_t* M, uint32_t bitLength);
 

@@ -7,62 +7,11 @@ uint128_t * D;
 //public
 uint128_t * E;
 
-//compares 128 bit pointers
-bool greaterThan128(uint128_t * a, uint128_t * b){
-    uint32_t ha = a->high;
-    uint32_t hb = b->high;
-
-    uint32_t m2a = a->mid2;
-    uint32_t m2b = b->mid2;
-
-    uint32_t m1a = a->mid1;
-    uint32_t m1b = b->mid1;
-
-    uint32_t la = a->low;
-    uint32_t lb = b->low;
-    if(ha > hb){
-        return true;
-    } else if(hb > ha){
-        return false;
-    } else if (m2a > m2b){
-        return true;
-    } else if (m2b > m2a){
-        return false;
-    } else if(m1a > m1b){
-        return true;
-    } else if(m1b > m2a){
-        return false;
-    } else if(la > lb){
-        return true;
-    } else if(lb > la){
-        return false;
-    }
-    return false;
-}
-
-//compares 128 bit pointers
-bool equalTo128(uint128_t* a, uint128_t* b){
-    uint32_t ha = a->high;
-    uint32_t hb = b->high;
-
-    uint32_t m2a = a->mid2;
-    uint32_t m2b = b->mid2;
-
-    uint32_t m1a = a->mid1;
-    uint32_t m1b = b->mid1;
-
-    uint32_t la = a->low;
-    uint32_t lb = b->low;
-    if((ha == hb) && (m2a == m2b) && (m1a == m1b) && (la == lb)){
-        return true;
-    }
-    return false;
-}
 
 //used to count bitlength for Montgomery Modular Multiplication
-uint32_t count_num_bits(uint128_t* value){
+uint8_t count_num_bits(uint128_t* value){
 
-    uint32_t count = 0;
+    uint8_t count = 0;
     uint32_t h = value->high;
     uint32_t m1 = value->mid1;
     uint32_t m2 = value->mid2;
@@ -92,33 +41,34 @@ uint32_t count_num_bits(uint128_t* value){
 uint128_t* mmm(uint128_t* X, uint128_t* Y, uint128_t* M, uint32_t bitLength){
     uint128_t * T = cast_to_uint128(0);
     uint128_t * n = cast_to_uint128(0);
+    //loop fusion not possible, nor loop fission
     for(uint32_t a=0; a < bitLength; a++){
         uint128_t * Xi = and_uint128(rshift_uint128(X, a), cast_to_uint128(1));
         n = xor_uint128(and_uint128(T, cast_to_uint128(1)), and_uint128(Xi, and_uint128(Y, cast_to_uint128(1))));
         T = add_uint128(T, add_uint128(mul_uint128(Xi, Y), mul_uint128(n, M)));
     }
-    if(greaterThan128(T, M) || equalTo128(T, M)){T = sub_uint128(T, M);}
+    if(gte_uint128(T, M)){T = sub_uint128(T, M);}
     return T;
 
 }
 
 //Modular Exponentiation
 uint128_t* me(uint128_t* message, uint128_t* key, uint128_t* modulus){
-	if (equalTo128(modulus, cast_to_uint128(0))) {
+	if (uint128_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint32_t key_bits = count_num_bits(key);
-    uint32_t mod_bits = count_num_bits(modulus);
+    uint8_t key_bits = count_num_bits(key);
+    uint8_t mod_bits = count_num_bits(modulus);
     uint128_t* r_squared = cast_to_uint128(1);
-    for(uint32_t a = 0; a < mod_bits*2; a++){
+    for(uint8_t a = 0; a < mod_bits*2; a++){
         //need modulus here
-        // r_squared = r_squared * 2 % modulus;
+        r_squared = mod_uint128(mul_uint128(r_squared,cast_to_uint128(2)), modulus);
     }
 	uint128_t* C = mmm(cast_to_uint128(1), r_squared, modulus, mod_bits);
     uint128_t* S = mmm(message, r_squared, modulus, mod_bits);
-    for (uint32_t i = 0; i < key_bits; i++) {
+    for (uint8_t i = 0; i < key_bits; i++) {
         uint128_t* key_i = and_uint128(rshift_uint128(key, i),cast_to_uint128(1));
-        if (equalTo128(key_i, cast_to_uint128(1))) {
+        if (equal_uint128(key_i, cast_to_uint128(1))) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
@@ -157,13 +107,10 @@ uint128_t* decrypt(uint128_t* encoded_message){
 int main() {
     // hello world
     uint128_t* message = cast_to_uint128(1289372189);
-    printf("Initial Message: ");
-    print_uint128(message);
+    print_uint128("Initial Message: ", message);
     uint128_t* encoded = encrypt(message);
-    printf("Encoded Message: ");
-    print_uint128(encoded);
+    print_uint128("Encoded Message: ", encoded);
     uint128_t* decoded = decrypt(encoded);
-    printf("Decoded Message (should be same as initial): ");
-    print_uint128(decoded);
+    print_uint128("Decoded Message (should be same as initial): ", decoded);
     return 0;
 }   

@@ -27,7 +27,9 @@ int mmm(int X, int Y, int M, int bitLength){
         n = (T & 1) ^ (Xi & (Y & 1));
         T = (T + (Xi*Y) + (n*M)) >> 1;
     }
-    if(T >= M ){T = T - M;}
+    if(T >= M ){
+		T = T - M;
+	}
     return T;
 
 }
