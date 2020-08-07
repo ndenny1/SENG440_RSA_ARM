@@ -7,6 +7,58 @@ uint128_t * D;
 //public
 uint128_t * E;
 
+//compares 128 bit pointers
+bool greaterThan128(uint128_t * a, uint128_t * b){
+    uint32_t ha = a->high;
+    uint32_t hb = b->high;
+
+    uint32_t m2a = a->mid2;
+    uint32_t m2b = b->mid2;
+
+    uint32_t m1a = a->mid1;
+    uint32_t m1b = b->mid1;
+
+    uint32_t la = a->low;
+    uint32_t lb = b->low;
+    if(ha > hb){
+        return true;
+    } else if(hb > ha){
+        return false;
+    } else if (m2a > m2b){
+        return true;
+    } else if (m2b > m2a){
+        return false;
+    } else if(m1a > m1b){
+        return true;
+    } else if(m1b > m2a){
+        return false;
+    } else if(la > lb){
+        return true;
+    } else if(lb > la){
+        return false;
+    }
+    return false;
+}
+
+//compares 128 bit pointers
+bool equalTo128(uint128_t* a, uint128_t* b){
+    uint32_t ha = a->high;
+    uint32_t hb = b->high;
+
+    uint32_t m2a = a->mid2;
+    uint32_t m2b = b->mid2;
+
+    uint32_t m1a = a->mid1;
+    uint32_t m1b = b->mid1;
+
+    uint32_t la = a->low;
+    uint32_t lb = b->low;
+    if((ha == hb) && (m2a == m2b) && (m1a == m1b) && (la == lb)){
+        return true;
+    }
+    return false;
+}
+
 //used to count bitlength for Montgomery Modular Multiplication
 uint32_t count_num_bits(uint128_t* value){
 
@@ -45,27 +97,28 @@ uint128_t* mmm(uint128_t* X, uint128_t* Y, uint128_t* M, uint32_t bitLength){
         n = xor_uint128(and_uint128(T, cast_to_uint128(1)), and_uint128(Xi, and_uint128(Y, cast_to_uint128(1))));
         T = add_uint128(T, add_uint128(mul_uint128(Xi, Y), mul_uint128(n, M)));
     }
-    if(T >= M ){T = sub_uint128(T, M);}
+    if(greaterThan128(T, M) || equalTo128(T, M)){T = sub_uint128(T, M);}
     return T;
 
 }
 
 //Modular Exponentiation
 uint128_t* me(uint128_t* message, uint128_t* key, uint128_t* modulus){
-	if (modulus == 0) {
+	if (equalTo128(modulus, cast_to_uint128(0))) {
 		return 0;
 	}
     uint32_t key_bits = count_num_bits(key);
     uint32_t mod_bits = count_num_bits(modulus);
     uint128_t* r_squared = cast_to_uint128(1);
     for(uint32_t a = 0; a < mod_bits*2; a++){
-        r_squared = mmm(r_squared, cast_to_uint128(2), modulus, mod_bits);
+        //need modulus here
+        // r_squared = r_squared * 2 % modulus;
     }
 	uint128_t* C = mmm(cast_to_uint128(1), r_squared, modulus, mod_bits);
     uint128_t* S = mmm(message, r_squared, modulus, mod_bits);
     for (uint32_t i = 0; i < key_bits; i++) {
         uint128_t* key_i = and_uint128(rshift_uint128(key, i),cast_to_uint128(1));
-        if (key_i == cast_to_uint128(1)) {
+        if (equalTo128(key_i, cast_to_uint128(1))) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
@@ -88,6 +141,9 @@ uint128_t* encrypt(uint128_t* message){
 
 //Private:
 //75312a2c 27da3489 9c87f263 d9701aa1
+
+//Public
+//00000000 00000000 00000000 00010001
 uint128_t* decrypt(uint128_t* encoded_message){
     M = uint128_init(0xd4549557, 0x1f28252d, 0x003e390a, 0x0f7d1783);
     D = uint128_init(0x75312a2c,0x27da3489,0x9c87f263, 0xd9701aa1);
