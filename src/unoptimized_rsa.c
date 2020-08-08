@@ -1,89 +1,103 @@
 #include "unoptimized_rsa.h"
-#include "int128.h"
 
 //modulus
-uint128_t * M;
+uint256_t * M;
 //private
-uint128_t * D;
+uint256_t * D;
 //public
-uint128_t * E;
+uint256_t * E;
+
 
 //used to count bitlength for Montgomery Modular Multiplication
-uint32_t count_num_bits(uint32_t value) {
-    uint32_t count = 0;
-
-    while(value > 0) {
-        count ++;
-        value >>= 1;
+uint16_t count_num_bits(uint256_t* value){
+    uint16_t count = 0;
+    uint16_t block = 0;
+    int i = 255;
+    for (; i >= 0; i--) {
+        uint8_t bit = get_bit(value, i);
+        if (bit == 0 && count == 0) {
+            continue;
+        }
+        count++;
     }
+    // printf("Num bits: %d\n", count);
     return count;
 }
 
 //Montgomery Modular Multiplication
-uint32_t mmm(uint32_t X, uint32_t Y, uint32_t M, uint32_t bitLength){
-    uint32_t T = 0;
-    uint32_t n = 0;
-    for(uint32_t a=0; a < bitLength; a++){
-        uint32_t Xi = (X >> a) & 1;
-        n = (T & 1) ^ (Xi & (Y & 1));
-        T = (T + (Xi*Y) + (n*M)) >> 1;
+uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
+    uint256_t * T = cast_to_uint256(0);
+    uint256_t * n = cast_to_uint256(0);
+    //loop fusion not possible, nor loop fission
+    for(uint16_t a=0; a < bitLength; a++){
+        uint256_t * Xi = cast_to_uint256(get_bit(X, a));
+        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
+        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
     }
-    if(T >= M ){T = T - M;}
+    if(gte_uint256(T, M)){T = sub_uint256(T, M);}
     return T;
 
 }
 
 //Modular Exponentiation
-uint32_t me(uint32_t message, uint32_t key, uint32_t modulus){
-	if (modulus == 0) {
+uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
+	if (uint256_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint32_t key_bits = count_num_bits(key);
-    uint32_t mod_bits = count_num_bits(modulus);
-    uint32_t r_squared = 1;
-    for(uint32_t a = 0; a < mod_bits*2; a++){
-        r_squared = r_squared * 2 % modulus;
+    uint16_t key_bits = count_num_bits(key);
+    uint16_t mod_bits = count_num_bits(modulus);
+    uint256_t* r_squared = cast_to_uint256(1);
+    // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
+    for(uint16_t a = 0; a < mod_bits*2; a++){
+        r_squared = mod_uint256(mul_uint256(r_squared,cast_to_uint256(2)), modulus);
     }
-	uint32_t C = mmm(1, r_squared, modulus, mod_bits);
-    uint32_t S = mmm(message, r_squared, modulus, mod_bits);
-    for (uint32_t i = 0; i < key_bits; i++) {
-        uint32_t key_i = (key >> i) & 1;
+	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
+    uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
+    for (uint16_t i = 0; i < mod_bits; i++) {
+        uint8_t key_i = get_bit(key, i);
         if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
     }
-    C = mmm(C,1, modulus, mod_bits);
+    C = mmm(cast_to_uint256(1), C, modulus, mod_bits);
 	return C;
 }
 
 //Functions for easy encryption/decryption of a message
-uint32_t encrypt(uint32_t message){
-    M = uint128_init(0x00b3577dc, 0x6297458a, 0x783fa7f2, 0x5a488bf79);
-    E = uint128_init(0x00000000, 0x00000000, 0x00000000, 0x00010001);
-    //we can probably get rid of this declaration, I was just using it to better understand the algorithm
-    uint32_t T = message;
+uint256_t* encrypt(uint256_t* message){
+    uint32_t mArr[8] = {0x00000000,0x00000000,0x00000000,0x00000000,0xd4549557, 0x1f28252d, 0x003e390a, 0x0f7d1783};
+    uint32_t eArr[8] = {0x00000000,0x00000000,0x00000000,0x00000000,0x00000000, 0x00000000, 0x00000000, 0x00010001};
+    M = uint256_init(mArr);
+    E = uint256_init(eArr);
     //algorithm is  C = T^E mod M (C is cypertext, T is plaintext, E is public key, M is modulus)
-    return  me(T, E, M);
+    return  me(message, E, M);
 }
+//Modulus:
+//d4549557 1f28252d 003e390a 0f7d1783
 
-uint32_t decrypt(uint32_t encoded_message){
-    M = uint128_init(0x00b3577dc, 0x6297458a, 0x783fa7f2, 0x5a488bf79);
-    D = uint128_init(0x600c5c7c,0xf398af1d6,0xa8f85857, 0x0945c31);
-    //we can probably get rid of this declaration, I was just using it to better understand the algorithm
-    uint32_t C = encoded_message;
+//Private:
+//75312a2c 27da3489 9c87f263 d9701aa1
+
+//Public
+//00000000 00000000 00000000 00010001
+uint256_t* decrypt(uint256_t* encoded_message){
+    uint32_t mArr[8] = {0x00000000,0x00000000,0x00000000,0x00000000,0xd4549557, 0x1f28252d, 0x003e390a, 0x0f7d1783};
+    uint32_t dArr[8] = {0x00000000,0x00000000,0x00000000,0x00000000,0x75312a2c,0x27da3489,0x9c87f263, 0xd9701aa1};
+    M = uint256_init(mArr);
+    D = uint256_init(dArr);
     //algorithm is  T = C^D mod M (C is cypertext, T is plaintext, D is private key, M is modulus)
-    return me(C, D, M);
+    return me(encoded_message, D, M);
 }
 
 
 int main() {
-    // hello world
-    uint32_t message = "Hello World";
-    printf("Initial Message: %d\n", message);
-    uint32_t encoded = encrypt(message);
-    printf("Encoded Message: %d\n", encoded);
-    uint32_t decoded = decrypt(encoded);
-    printf("Decoded Message (should be same as initial): %d\n", decoded);
+    uint32_t mes = 123456789;
+    uint256_t* message = cast_to_uint256(mes);
+    print_uint256("Initial Message: ", message);
+    uint256_t* encoded = encrypt(message);
+    print_uint256("Encoded Message: ", encoded);
+    uint256_t* decoded = decrypt(encoded);
+    print_uint256("Decoded Message: ", decoded);
     return 0;
 }   

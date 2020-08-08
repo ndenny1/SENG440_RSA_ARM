@@ -3,28 +3,19 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include "int256.h"
 
 #ifndef bool
 	#include <stdbool.h>
 	#define bool	_Bool
 #endif
 
-bool isPrime(int a);
+uint16_t count_num_bits(uint256_t* value);
 
-void generatePrimes();
+uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength);
 
-int greatestCommonDenom(int a, int b);
+uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus);
 
-bool isRelativelyPrime(int a, int b);
+uint256_t* encrypt(uint256_t* message);
 
-void generateE();
-
-void generateD();
-
-int mmm(int X, int Y, int M, int bitlength);
-
-int me(int base, int exponent, int modulus);
-
-int encrypt(int message);
-
-int decrypt(int encoded_message);
+uint256_t* decrypt(uint256_t* encoded_message);
