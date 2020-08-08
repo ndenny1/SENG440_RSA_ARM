@@ -12,13 +12,14 @@ uint256_t * E;
 uint16_t count_num_bits(uint256_t* value){
     uint16_t count = 0;
     uint16_t block = 0;
-    for (; block < 8; block++) {
-		uint32_t curBlock = value->blocks[block];
-        while(curBlock){
-            count++;
-            curBlock >>= 1;
+    int i = 255;
+    for (; i >= 0; i--) {
+        uint8_t bit = get_bit(value, i);
+        if (bit == 0 && count == 0) {
+            continue;
         }
-	}
+        count++;
+    }
     // printf("Num bits: %d\n", count);
     return count;
 }
@@ -29,9 +30,9 @@ uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
     uint256_t * n = cast_to_uint256(0);
     //loop fusion not possible, nor loop fission
     for(uint16_t a=0; a < bitLength; a++){
-        uint256_t * Xi = and_uint256(rshift_uint256(X, a), cast_to_uint256(1));
+        uint256_t * Xi = cast_to_uint256(get_bit(X, a));
         n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
-        T = add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M)));
+        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
     }
     if(gte_uint256(T, M)){T = sub_uint256(T, M);}
     return T;
@@ -53,8 +54,8 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
 	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
     uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
     for (uint16_t i = 0; i < mod_bits; i++) {
-        uint256_t* key_i = and_uint256(rshift_uint256(key, i),cast_to_uint256(1));
-        if (equal_uint256(key_i, cast_to_uint256(1))) {
+        uint8_t key_i = get_bit(key, i);
+        if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
