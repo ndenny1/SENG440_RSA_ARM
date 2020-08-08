@@ -91,7 +91,7 @@ uint256_t* decrypt(uint256_t* encoded_message){
 
 
 int main() {
-    uint32_t mes = (int)"Hello World";
+    uint32_t mes = 123456789;
     uint256_t* message = cast_to_uint256(mes);
     print_uint256("Initial Message: ", message);
     uint256_t* encoded = encrypt(message);
