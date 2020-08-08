@@ -1,4 +1,4 @@
-#include "int128.h"
+#include "int256.h"
 
 uint256_t * uint256_init(uint32_t blocks[8]) {
 	uint256_t * r = (uint256_t *)malloc(sizeof(uint256_t));
