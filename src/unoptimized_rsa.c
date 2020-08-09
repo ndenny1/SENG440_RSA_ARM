@@ -44,11 +44,20 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLeng
         uint256_t* mulAdd = add_uint256(xyMul, nmMul);
         uint256_t* tmulAdd = add_uint256(T, mulAdd);
         T = rshift_uint256(tmulAdd, 1);
+        free(Xi);
+        free(tAnd);
+        free(yAnd);
+        free(xyAnd);
+        free(xyMul);
+        free(nmMul);
+        free(mulAdd);
+        free(tmulAdd);
     }
     if(gte_uint256(T, M)){
         T = sub_uint256(T, M);
     }
     printf("MMM complete\n");
+    free(n);
     return T;
 }
 
