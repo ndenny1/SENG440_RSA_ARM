@@ -10,9 +10,9 @@
 	#define bool	_Bool
 #endif
 
-uint16_t count_num_bits(uint256_t* value);
+uint8_t count_num_bits(uint256_t* value);
 
-uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength);
+uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength);
 
 uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus);
 
