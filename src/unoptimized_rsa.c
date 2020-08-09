@@ -30,19 +30,20 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLengt
     //unroll all instructions to save register space
     uint8_t a=0;
     //unroll all instructions to save register space
-    printf("Starting MMM\n");
     for(; a < bitLength; a++){
-        uint256_t* oneCast = cast_to_uint256(1);
+        // uint256_t* oneCast = cast_to_uint256(1);
         uint256_t * Xi = cast_to_uint256(get_bit(X, a));
-        uint256_t* tAnd = and_uint256(T, oneCast);
-        uint256_t* yAnd = and_uint256(Y, oneCast);
-        uint256_t* xyAnd = and_uint256(Xi, yAnd);
-        n = xor_uint256(tAnd, xyAnd);
-        uint256_t* xyMul = mul_uint256(Xi, Y);
-        uint256_t* nmMul = mul_uint256(n, M);
-        uint256_t* mulAdd = add_uint256(xyMul, nmMul);
-        uint256_t* tmulAdd = add_uint256(T, mulAdd);
-        T = rshift_uint256(tmulAdd, 1);
+        // uint256_t* tAnd = and_uint256(T, oneCast);
+        // uint256_t* yAnd = and_uint256(Y, oneCast);
+        // uint256_t* xyAnd = and_uint256(Xi, yAnd);
+        // n = xor_uint256(tAnd, xyAnd);
+        // uint256_t* xyMul = mul_uint256(Xi, Y);
+        // uint256_t* nmMul = mul_uint256(n, M);
+        // uint256_t* mulAdd = add_uint256(xyMul, nmMul);
+        // uint256_t* tmulAdd = add_uint256(T, mulAdd);
+        // T = rshift_uint256(tmulAdd, 1);
+        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
+        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
     }
     if(gte_uint256(T, M)){
         T = sub_uint256(T, M);
