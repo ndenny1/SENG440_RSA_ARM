@@ -30,6 +30,7 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLengt
     //unroll all instructions to save register space
     uint8_t a=0;
     //unroll all instructions to save register space
+    printf("Starting MMM\n");
     for(; a < bitLength; a++){
         uint256_t* oneCast = cast_to_uint256(1);
         uint256_t * Xi = cast_to_uint256(get_bit(X, a));
@@ -46,7 +47,6 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLengt
     if(gte_uint256(T, M)){
         T = sub_uint256(T, M);
     }
-    printf("MMM complete\n");
     return T;
 }
 
@@ -62,16 +62,21 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
     for(uint16_t a = 0; a < mod_bits*2; a++){
         r_squared = mod_uint256(mul_uint256(r_squared,cast_to_uint256(2)), modulus);
     }
+    printf("Rsquared calculated\n");
 	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
     uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
+    printf("C and S calculated\n");
     for (uint16_t i = 0; i < mod_bits; i++) {
         uint8_t key_i = get_bit(key, i);
         if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
         S = mmm(S, S, modulus, mod_bits);
+        printf("%d\n", i);
     }
+    printf("For loop completed\n");
     C = mmm(cast_to_uint256(1), C, modulus, mod_bits);
+    printf("Descaling completed\n");
 	return C;
 }
 
