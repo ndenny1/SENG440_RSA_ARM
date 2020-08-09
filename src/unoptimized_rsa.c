@@ -9,9 +9,8 @@ uint256_t * E;
 
 
 //used to count bitlength for Montgomery Modular Multiplication
-inline uint16_t count_num_bits(uint256_t* value){
-    uint16_t count = 0;
-    uint16_t block = 0;
+inline uint8_t count_num_bits(uint256_t* value){
+    uint8_t count = 0;
     int i = 255;
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
@@ -29,7 +28,7 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLeng
     register uint256_t * T = cast_to_uint256(0);
     register uint256_t * n = cast_to_uint256(0);
     //unroll all instructions to save register space
-    uint16_t a=0;
+    uint8_t a=0;
     //unroll all instructions to save register space
     printf("Starting MMM\n");
     for(; a < bitLength; a++){
@@ -44,14 +43,6 @@ inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLeng
         uint256_t* mulAdd = add_uint256(xyMul, nmMul);
         uint256_t* tmulAdd = add_uint256(T, mulAdd);
         T = rshift_uint256(tmulAdd, 1);
-        free(Xi);
-        free(tAnd);
-        free(yAnd);
-        free(xyAnd);
-        free(xyMul);
-        free(nmMul);
-        free(mulAdd);
-        free(tmulAdd);
     }
     if(gte_uint256(T, M)){
         T = sub_uint256(T, M);
@@ -70,7 +61,7 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
     uint16_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
-    for(uint16_t a = 0; a < mod_bits*2; a++){
+    for(uint8_t a = 0; a < mod_bits*2; a++){
         r_squared = mod_uint256(mul_uint256(r_squared,cast_to_uint256(2)), modulus);
     }
     printf("Rsquared calculated\n");
