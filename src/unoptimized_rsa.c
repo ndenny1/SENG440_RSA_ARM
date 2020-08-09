@@ -24,24 +24,31 @@ inline uint8_t count_num_bits(uint256_t* value){
 }
 
 //Montgomery Modular Multiplication
-inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
+uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
     register uint256_t * T = cast_to_uint256(0);
     register uint256_t * n = cast_to_uint256(0);
     //unroll all instructions to save register space
     register uint8_t a=0;
     register uint256_t * Xi;
+    uint256_t* oneCast = cast_to_uint256(1);
+    uint256_t* tAnd;
+    uint256_t* yAnd;
+    uint256_t* xyAnd;
+    uint256_t* xyMul;
+    uint256_t* mulAdd;
+    uint256_t* tmulAdd;
+    uint256_t* nmMul;
     //unroll all instructions to save register space
     for(; a < bitLength; a++){
-        uint256_t* oneCast = cast_to_uint256(1);
         Xi = cast_to_uint256(get_bit(X, a));
-        uint256_t* tAnd = and_uint256(T, oneCast);
-        uint256_t* yAnd = and_uint256(Y, oneCast);
-        uint256_t* xyAnd = and_uint256(Xi, yAnd);
+        tAnd = and_uint256(T, oneCast);
+        yAnd = and_uint256(Y, oneCast);
+        xyAnd = and_uint256(Xi, yAnd);
         n = xor_uint256(tAnd, xyAnd);
-        uint256_t* xyMul = mul_uint256(Xi, Y);
-        uint256_t* nmMul = mul_uint256(n, M);
-        uint256_t* mulAdd = add_uint256(xyMul, nmMul);
-        uint256_t* tmulAdd = add_uint256(T, mulAdd);
+        xyMul = mul_uint256(Xi, Y);
+        nmMul = mul_uint256(n, M);
+        mulAdd = add_uint256(xyMul, nmMul);
+        tmulAdd = add_uint256(T, mulAdd);
         T = rshift_uint256(tmulAdd, 1);
     }
     if(gte_uint256(T, M)){
@@ -55,8 +62,8 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
 	if (uint256_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint16_t key_bits = count_num_bits(key);
-    uint16_t mod_bits = count_num_bits(modulus);
+    uint8_t key_bits = count_num_bits(key);
+    uint8_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
     for(uint16_t a = 0; a < mod_bits*2; a++){
