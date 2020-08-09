@@ -25,7 +25,7 @@ int mmm(int X, int Y, int M, int bitLength){
 	int countdown = bitLength;
 	int curBit = 1;
 	//optimized for loop, remove declaration, change comparison to != instead of >, left shift for loop decrement
-    for(; countdown !=0; curBit <<= 1){
+    for(; countdown !=0;countdown--, curBit <<= 1){
 		//could change to != 0
         int Xi = (X & curBit) & 1;
         n = (T & 1) ^ (Xi & (Y & 1));
