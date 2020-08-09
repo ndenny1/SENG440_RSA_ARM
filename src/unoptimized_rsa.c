@@ -9,9 +9,8 @@ uint256_t * E;
 
 
 //used to count bitlength for Montgomery Modular Multiplication
-uint16_t count_num_bits(uint256_t* value){
-    uint16_t count = 0;
-    uint16_t block = 0;
+inline uint8_t count_num_bits(uint256_t* value){
+    uint8_t count = 0;
     int i = 255;
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
@@ -25,18 +24,32 @@ uint16_t count_num_bits(uint256_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
-    uint256_t * T = cast_to_uint256(0);
-    uint256_t * n = cast_to_uint256(0);
-    //loop fusion not possible, nor loop fission
-    for(uint16_t a=0; a < bitLength; a++){
+inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
+    register uint256_t * T = cast_to_uint256(0);
+    register uint256_t * n = cast_to_uint256(0);
+    //unroll all instructions to save register space
+    uint8_t a=0;
+    //unroll all instructions to save register space
+    printf("Starting MMM\n");
+    for(; a < bitLength; a++){
+        uint256_t* oneCast = cast_to_uint256(1);
         uint256_t * Xi = cast_to_uint256(get_bit(X, a));
-        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
-        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
+        uint256_t* tAnd = and_uint256(T, oneCast);
+        uint256_t* yAnd = and_uint256(Y, oneCast);
+        uint256_t* xyAnd = and_uint256(Xi, yAnd);
+        n = xor_uint256(tAnd, xyAnd);
+        uint256_t* xyMul = mul_uint256(Xi, Y);
+        uint256_t* nmMul = mul_uint256(n, M);
+        uint256_t* mulAdd = add_uint256(xyMul, nmMul);
+        uint256_t* tmulAdd = add_uint256(T, mulAdd);
+        T = rshift_uint256(tmulAdd, 1);
     }
-    if(gte_uint256(T, M)){T = sub_uint256(T, M);}
+    if(gte_uint256(T, M)){
+        T = sub_uint256(T, M);
+    }
+    printf("MMM complete\n");
+    free(n);
     return T;
-
 }
 
 //Modular Exponentiation
@@ -48,11 +61,13 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
     uint16_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
-    for(uint16_t a = 0; a < mod_bits*2; a++){
+    for(uint8_t a = 0; a < mod_bits*2; a++){
         r_squared = mod_uint256(mul_uint256(r_squared,cast_to_uint256(2)), modulus);
     }
+    printf("Rsquared calculated\n");
 	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
     uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
+    printf("C and S calculated\n");
     for (uint16_t i = 0; i < mod_bits; i++) {
         uint8_t key_i = get_bit(key, i);
         if (key_i == 1) {
@@ -60,7 +75,9 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
         }
         S = mmm(S, S, modulus, mod_bits);
     }
+    printf("For loop completed\n");
     C = mmm(cast_to_uint256(1), C, modulus, mod_bits);
+    printf("Descaling completed\n");
 	return C;
 }
 
