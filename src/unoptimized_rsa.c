@@ -24,12 +24,12 @@ inline uint8_t count_num_bits(uint256_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
-    uint256_t * T = cast_to_uint256(0);
-    uint256_t * n = cast_to_uint256(0);
+inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
+    register uint256_t * T = cast_to_uint256(0);
+    register uint256_t * n = cast_to_uint256(0);
     //unroll all instructions to save register space
-    uint8_t a=0;
-    uint256_t * Xi;
+    register uint8_t a=0;
+    register uint256_t * Xi;
     //unroll all instructions to save register space
     for(; a < bitLength; a++){
         uint256_t* oneCast = cast_to_uint256(1);
