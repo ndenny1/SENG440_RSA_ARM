@@ -26,17 +26,23 @@ uint16_t count_num_bits(uint256_t* value){
 
 //Montgomery Modular Multiplication
 uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
-    uint256_t * T = cast_to_uint256(0);
-    uint256_t * n = cast_to_uint256(0);
-    //loop fusion not possible, nor loop fission
+    register uint256_t * T = cast_to_uint256(0);
+    register uint256_t * n = cast_to_uint256(0);
+    //unroll all instructions to save register space
     for(uint16_t a=0; a < bitLength; a++){
-        uint256_t * Xi = cast_to_uint256(get_bit(X, a));
-        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
-        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
+        register uint256_t * Xi = cast_to_uint256(get_bit(X, a));
+        register uint256_t* tAnd = and_uint256(T, cast_to_uint256(1));
+        register uint256_t* yAnd = and_uint256(Y, cast_to_uint256(1));
+        register uint256_t* xyAnd = and_uint256(Xi, yAnd);
+        n = xor_uint256(tAnd, xyAnd);
+        register uint256_t* xyMul = mul_uint256(Xi, Y);
+        register uint256_t* nmMul = mul_uint256(n, M);
+        register uint256_t* mulAdd = add_uint256(xyMul, nmMul);
+        register uint256_t* tmulAdd = add_uint256(T, mulAdd);
+        T = rshift_uint256(tmulAdd, 1);
     }
     if(gte_uint256(T, M)){T = sub_uint256(T, M);}
     return T;
-
 }
 
 //Modular Exponentiation
