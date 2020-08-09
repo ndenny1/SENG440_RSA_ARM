@@ -9,7 +9,7 @@ uint256_t * E;
 
 
 //used to count bitlength for Montgomery Modular Multiplication
-uint16_t count_num_bits(uint256_t* value){
+inline uint16_t count_num_bits(uint256_t* value){
     uint16_t count = 0;
     uint16_t block = 0;
     int i = 255;
