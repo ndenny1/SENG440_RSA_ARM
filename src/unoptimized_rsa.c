@@ -25,7 +25,7 @@ inline uint16_t count_num_bits(uint256_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
+inline uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
     register uint256_t * T = cast_to_uint256(0);
     register uint256_t * n = cast_to_uint256(0);
     //unroll all instructions to save register space
