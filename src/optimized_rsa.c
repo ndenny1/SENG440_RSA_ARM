@@ -20,7 +20,6 @@ uint16_t count_num_bits(uint160_t* value){
         }
 		count++;
     }
-	printf("Num bits: %d\n", count);
     return count;
 }
 
@@ -28,7 +27,7 @@ uint16_t count_num_bits(uint160_t* value){
 uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
     register uint160_t * T = cast_to_uint160(0);
     register uint160_t * n = cast_to_uint160(0);
-    int a=0;
+    uint8_t a=0;
     register uint160_t * Xi;
     uint160_t* oneCast = cast_to_uint160(1);
     uint160_t* tAnd;
@@ -38,7 +37,6 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
     uint160_t* mulAdd;
     uint160_t* tmulAdd;
     uint160_t* nmMul;
-    printf("Starting MMM\n");
     //optimized loop, decrement and compare with zero instead of increment and compare with int
     // #pragma omp parallel
     for(; a < bitLength;a++){
@@ -52,7 +50,6 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
         mulAdd = add_uint160(xyMul, nmMul);
         tmulAdd = add_uint160(T, mulAdd);
         T = rshift_uint160(tmulAdd, 1);
-        printf("%d\n", a);
     }
     free(oneCast);
     free(tAnd);
@@ -62,7 +59,7 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
     free(mulAdd);
     free(tmulAdd);
     free(nmMul);
-    if(gte_uint160(T, M)){sub_inline(T, M);}
+    if(gte_uint160(T, M)){sub_modifying(T, M);}
     return T;
 }
 
@@ -80,7 +77,6 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
     uint160_t * two = cast_to_uint160(2);
     // uint160_t* r_squared = mod_uint160(cast_to_uint160((1 << (2*mod_bits))), modulus);
     uint16_t a = 0;
-	printf("Calculating rsquared\n");
     for(; a < mod_bits*2; a++){
         mul_modifying(r_squared, two);
         mod_modifying(r_squared, modulus);
