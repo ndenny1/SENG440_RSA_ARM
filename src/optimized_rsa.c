@@ -24,22 +24,54 @@ uint16_t count_num_bits(uint160_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
+// uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
+//     uint160_t * T = cast_to_uint160(0);
+//     uint160_t * n = cast_to_uint160(0);
+// 	int countdown = bitLength;
+// 	int curBit = 1;
+// 	//optimized for loop, remove declaration, change comparison to != instead of >, left shift for loop decrement
+//     for(; countdown !=0;countdown--, curBit <<= 1){
+// 		//could change to != 0
+//         uint160_t * Xi = cast_to_uint160(get_bit(X, curBit));
+//         n = xor_uint160(and_uint160(T, cast_to_uint160(1)), and_uint160(Xi, and_uint160(Y, cast_to_uint160(1))));
+//         T = rshift_uint160(add_uint160(T, add_uint160(mul_uint160(Xi, Y), mul_uint160(n, M))), 1);
+//     }
+//     if(gte_uint160(T, M)){T = sub_uint160(T, M);}
+//     return T;
+
+// }
+
+uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength) {
     uint160_t * T = cast_to_uint160(0);
     uint160_t * n = cast_to_uint160(0);
-	int countdown = bitLength;
-	int curBit = 1;
-	//optimized for loop, remove declaration, change comparison to != instead of >, left shift for loop decrement
-    for(; countdown !=0;countdown--, curBit <<= 1){
-		//could change to != 0
-        uint160_t * Xi = cast_to_uint160(get_bit(X, curBit));
-        n = xor_uint160(and_uint160(T, cast_to_uint160(1)), and_uint160(Xi, and_uint160(Y, cast_to_uint160(1))));
-        T = rshift_uint160(add_uint160(T, add_uint160(mul_uint160(Xi, Y), mul_uint160(n, M))), 1);
+    uint160_t * one = cast_to_uint160(1);
+    uint160_t * r1 = cast_to_uint160(0);
+    uint160_t * r2 = cast_to_uint160(0);
+    uint160_t * r3 = cast_to_uint160(0);
+    uint8_t a = 0;
+    for (; a < bitLength; a++) {
+        uint160_t * Xi = cast_to_uint160(get_bit(X, a));
+        r1 = and_uint160(T, one);
+        r2 = and_uint160(Y, one);
+        r3 = and_uint160(Xi, r2);
+        n = xor_uint160(r1, r3);
+        r1 = mul_uint160(n, M);
+        r2 = mul_uint160(Xi, Y);
+        r3 = add_uint160(r2, r1);
+        add_modifying(T, r3);
+        rshift_modifying(T, 1);
     }
-    if(gte_uint160(T, M)){T = sub_uint160(T, M);}
+    free(r1);
+    free(r2);
+    free(r3);
+    if (gte_uint160(T, M)) {
+        sub_modifying(T, M);
+    }
+    free(n);
+    free(one);
     return T;
-
 }
+
 
 //Modular Exponentiation
 uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
@@ -48,14 +80,19 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
 	}
     uint16_t key_bits = count_num_bits(key);
     uint16_t mod_bits = count_num_bits(modulus);
-    uint160_t* r_squared = cast_to_uint160(1);
+    uint160_t * r_squared = cast_to_uint160(1);
+    uint160_t * one = cast_to_uint160(1);
+    uint160_t * two = cast_to_uint160(2);
     // uint160_t* r_squared = mod_uint160(cast_to_uint160((1 << (2*mod_bits))), modulus);
     uint16_t a = 0;
     for(; a < mod_bits*2; a++){
-        r_squared = mod_uint160(mul_uint160(r_squared,cast_to_uint160(2)), modulus);
+        mul_modifying(r_squared, two);
+        mod_modifying(r_squared, modulus);
     }
-	uint160_t* C = mmm(cast_to_uint160(1), r_squared, modulus, mod_bits);
+    free(two);
+	uint160_t* C = mmm(one, r_squared, modulus, mod_bits);
     uint160_t* S = mmm(message, r_squared, modulus, mod_bits);
+    free(r_squared);
     uint16_t i = 0;
     for (; i < key_bits; i++) {
         uint8_t key_i = get_bit(key, i);
@@ -64,7 +101,9 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
         }
         S = mmm(S, S, modulus, mod_bits);
     }
-    C = mmm(cast_to_uint160(1), C, modulus, mod_bits);
+    free(S);
+    C = mmm(one, C, modulus, mod_bits);
+    free(one);
 	return C;
 }
 
@@ -96,6 +135,32 @@ uint160_t* decrypt(uint160_t* encoded_message){
 
 
 int main() {
+
+    // print_uint160("x: ", x);
+    // print_uint160("y: ", y);
+    // print_uint160("x + y = ", add_uint160(x, y));
+    // print_uint160("x - y = ", sub_uint160(x, y));
+    // print_uint160("x * y = ", mul_uint160(x, y));
+    // print_uint160("x % y = ", mod_uint160(x, y));
+    // print_uint160("x << 54 = ", lshift_uint160(x, 54));
+    // print_uint160("x >> 54 = ", rshift_uint160(x, 54));
+    // uint16_t x_bits = count_num_bits(x);
+    // printf("x bits:\n");
+    // uint8_t i = 1;
+    // for (; i <= x_bits; i++){
+    //     if (i % 4 == 0) {
+    //         printf(" ");
+    //     }
+    //     uint8_t bit = get_bit(x, (x_bits - i));
+    //     printf("%u", bit);
+    // }
+    // printf("\n");
+    // uint160_t * x = uint160_init((uint32_t []){0, 0, 0, 0xFEDCBA98, 0x76543210});
+    // uint160_t * y = uint160_init((uint32_t []){0, 0, 0, 0x01234567, 0x89ABCDEF});
+    // uint160_t * mod = uint160_init((uint32_t []){0, 0, 0, 0xDEADBEEF, 0xDEADBEEF});
+    // printf("mod bits: %d\n", count_num_bits(mod));
+    // uint160_t * r = me(x, y, mod);
+    // print_uint160("me(x, y, mod) = ", r);
     uint32_t mes = 123456789;
     uint160_t* message = cast_to_uint160(mes);
     print_uint160("Initial Message: ", message);

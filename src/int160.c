@@ -14,40 +14,108 @@ uint160_t * cast_to_uint160(uint32_t x) {
 	return uint160_init((uint32_t[]){0, 0, 0, 0, x});
 }
 uint160_t * add_uint160(uint160_t * x, uint160_t * y) {
-	uint32_t b1, b2, b3, b4, b5;
-	uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
-	uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
-	
-	// Needs to compile with -O3 flag
-	__asm__ __volatile__ (
-		"adds %4, %9, %14;\n"
-		"\tadcs %3, %8, %13;\n"
-		"\tadcs %2, %7, %12;\n"
-		"\tadcs %1, %6, %11;\n"
-		"\tadc %0, %5, %10;\n"
-		: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
-		: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
-	);
+	uint32_t r_blocks[5];
 
-	return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
+	int i = 4;
+	uint8_t carry = 0;
+	for (; i >= 0; i--) {
+		uint32_t xi = x->blocks[i];
+		uint32_t yi = y->blocks[i];
+		uint32_t ri = xi + yi + carry;
+		carry = (ri < xi || ri < yi);
+		r_blocks[i] = ri;
+	}
+	return uint160_init(r_blocks);
+	// uint32_t b1, b2, b3, b4, b5;
+	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
+	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
+	
+	// // Needs to compile with -O3 flag
+	// __asm__ __volatile__ (
+	// 	"adds %4, %9, %14;\n"
+	// 	"\tadcs %3, %8, %13;\n"
+	// 	"\tadcs %2, %7, %12;\n"
+	// 	"\tadcs %1, %6, %11;\n"
+	// 	"\tadc %0, %5, %10;\n"
+	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
+	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
+	// );
+
+	// return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
 }
-uint160_t * sub_uint160(uint160_t * x, uint160_t * y) {
-	uint32_t b1, b2, b3, b4, b5;
-	uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
-	uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
-	
-	// Needs to compile with -O3 flag
-	__asm__ __volatile__ (
-		"subs %4, %9, %14;\n"
-		"\tsbcs %3, %8, %13;\n"
-		"\tsbcs %2, %7, %12;\n"
-		"\tsbcs %1, %6, %11;\n"
-		"\tsbc %0, %5, %10;\n"
-		: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
-		: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
-	);
 
-	return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
+void add_modifying(uint160_t * x, uint160_t * y) {
+	int i = 4;
+	uint8_t carry = 0;
+	for (; i >= 0; i--) {
+		uint32_t xi = x->blocks[i];
+		uint32_t yi = y->blocks[i];
+		uint32_t ri = xi + yi + carry;
+		carry = (ri < xi || ri < yi);
+		x->blocks[i] = ri;
+	}
+	// uint32_t b1, b2, b3, b4, b5;
+	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
+	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
+	
+	// // Needs to compile with -O3 flag
+	// __asm__ __volatile__ (
+	// 	"adds %4, %9, %14;\n"
+	// 	"\tadcs %3, %8, %13;\n"
+	// 	"\tadcs %2, %7, %12;\n"
+	// 	"\tadcs %1, %6, %11;\n"
+	// 	"\tadc %0, %5, %10;\n"
+	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
+	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
+	// );
+	// x->blocks[0] = b1;
+	// x->blocks[1] = b2;
+	// x->blocks[2] = b3;
+	// x->blocks[3] = b4;
+	// x->blocks[4] = b5;
+}
+
+uint160_t * sub_uint160(uint160_t * x, uint160_t * y) {
+	uint32_t r_blocks[5];
+
+	int i = 4;
+	uint8_t carry = 0;
+	for (; i >= 0; i--) {
+		uint32_t xi = x->blocks[i];
+		uint32_t yi = y->blocks[i];
+		uint32_t ri = xi - yi - carry;
+		carry = (ri > xi);
+		r_blocks[i] = ri;
+	}
+	return uint160_init(r_blocks);
+	// uint32_t b1, b2, b3, b4, b5;
+	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
+	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
+	
+	// // Needs to compile with -O3 flag
+	// __asm__ __volatile__ (
+	// 	"subs %4, %9, %14;\n"
+	// 	"\tsbcs %3, %8, %13;\n"
+	// 	"\tsbcs %2, %7, %12;\n"
+	// 	"\tsbcs %1, %6, %11;\n"
+	// 	"\tsbc %0, %5, %10;\n"
+	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
+	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
+	// );
+
+	// return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
+}
+
+void sub_modifying(uint160_t * x, uint160_t * y) {
+	int i = 4;
+	uint8_t carry = 0;
+	for (; i >= 0; i--) {
+		uint32_t xi = x->blocks[i];
+		uint32_t yi = y->blocks[i];
+		uint32_t ri = xi - yi - carry;
+		carry = (ri > xi);
+		x->blocks[i] = ri;
+	}
 }
 
 void mul_uint32(uint32_t x, uint32_t y, uint32_t * carry, uint32_t * overflow) {
@@ -74,49 +142,191 @@ void mul_uint32(uint32_t x, uint32_t y, uint32_t * carry, uint32_t * overflow) {
 }
 
 uint160_t * mul_uint160(uint160_t * x, uint160_t * y) {
-	uint8_t i = 0;
-	uint8_t j = 0;
+	uint32_t carry, overflow;
+	uint160_t * mul_result = uint160_init((uint32_t []){0, 0, 0, 0, 0});
 	
-	uint160_t * col1 = uint160_init((uint32_t[]){0, 0, 0, 0, 0});
-	uint160_t * col2 = uint160_init((uint32_t[]){0, 0, 0, 0, 0});
-	uint160_t * col3 = uint160_init((uint32_t[]){0, 0, 0, 0, 0});
-	uint160_t * col4 = uint160_init((uint32_t[]){0, 0, 0, 0, 0});
-	uint160_t * col5 = uint160_init((uint32_t[]){0, 0, 0, 0, 0});
-	
-	uint160_t * columns[5] = {col1, col2, col3, col4, col5};
+	mul_uint32(x->blocks[4], y->blocks[4], &carry, &overflow);
+	uint160_t * col1 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[3], y->blocks[4], &carry, &overflow);
+	uint160_t * col2 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[4], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col2, mul_result);
 
-	uint32_t multiplier, multiplicand, carry, overflow;
-	for (; i < 5; i++) {
-		for (j = 0; j < 5 - i; j++) {
-			multiplier = x->blocks[4-i];
-			multiplicand = y->blocks[4-j];
-			mul_uint32(multiplier, multiplicand, &carry, &overflow);
-			columns[i + j] = add_uint160(columns[i + j], uint160_init((uint32_t[]){0, 0, 0, carry, overflow}));
-		}
+	mul_uint32(x->blocks[2], y->blocks[4], &carry, &overflow);
+	uint160_t * col3 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[3], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col3, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col3, mul_result);
+
+	mul_uint32(x->blocks[1], y->blocks[4], &carry, &overflow);
+	uint160_t * col4 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[2], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+	mul_uint32(x->blocks[3], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[1], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+
+	mul_uint32(x->blocks[0], y->blocks[4], &carry, &overflow);
+	uint160_t * col5 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[1], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[2], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[3], y->blocks[1], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[0], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+
+	uint160_t * col_shift = uint160_init((uint32_t[]){0, col1->blocks[0], col1->blocks[1], col1->blocks[2], col1->blocks[3]});
+	add_modifying(col2, col_shift);
+	col_shift->blocks[1] = col2->blocks[0];
+	col_shift->blocks[2] = col2->blocks[1];
+	col_shift->blocks[3] = col2->blocks[2];
+	col_shift->blocks[4] = col2->blocks[3];
+	
+	add_modifying(col3, uint160_init((uint32_t[]){0, col2->blocks[0], col2->blocks[1], col2->blocks[2], col2->blocks[3]}));
+	col_shift->blocks[1] = col3->blocks[0];
+	col_shift->blocks[2] = col3->blocks[1];
+	col_shift->blocks[3] = col3->blocks[2];
+	col_shift->blocks[4] = col3->blocks[3];
+	add_modifying(col4, uint160_init((uint32_t[]){0, col3->blocks[0], col3->blocks[1], col3->blocks[2], col3->blocks[3]}));
+
+	col_shift->blocks[1] = col4->blocks[0];
+	col_shift->blocks[2] = col4->blocks[1];
+	col_shift->blocks[3] = col4->blocks[2];
+	col_shift->blocks[4] = col4->blocks[3];
+	add_modifying(col5, uint160_init((uint32_t[]){0, col4->blocks[0], col4->blocks[1], col4->blocks[2], col4->blocks[3]}));
+	uint32_t c1 = col5->blocks[4], c2 = col4->blocks[4], c3 = col3->blocks[4], c4 = col2->blocks[4], c5 = col1->blocks[4];
+	free(col_shift);
+	free(col1);
+	free(col2);
+	free(col3);
+	free(col4);
+	free(col5);
+	return uint160_init((uint32_t[]){c1, c2, c3, c4, c5});
+}
+void mul_modifying(uint160_t * x, uint160_t * y) {
+	if (uint160_equal_to_zero(x)) {
+		return;
 	}
-
-	for (i = 1; i < 5; i++) {
-		uint160_t * prev_col = columns[i - 1];
-		columns[i] = add_uint160(columns[i], uint160_init((uint32_t []) {0, prev_col->blocks[0], prev_col->blocks[1], prev_col->blocks[2], prev_col->blocks[3]}));
+	if (uint160_equal_to_zero(y)) {
+		x->blocks[0] = 0;
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return;	
 	}
-
-	// uint160_t * prev_col = columns[0];
-	// columns[1] = add_uint160(columns[1], uint160_init((uint32_t[]){0, prev_col->blocks[0], prev_col->blocks[1], prev_col->blocks[2], prev_col->blocks[3]}));
-	// prev_col = columns[1];
-	// columns[2] = add_uint160(columns[2], uint160_init((uint32_t[]){0, prev_col->blocks[0], prev_col->blocks[1], prev_col->blocks[2], prev_col->blocks[3]}));
-	// prev_col = columns[2];
-	// columns[3] = add_uint160(columns[3], uint160_init((uint32_t[]){0, prev_col->blocks[0], prev_col->blocks[1], prev_col->blocks[2], prev_col->blocks[3]}));
-	// prev_col = columns[3];
-	// columns[4] = add_uint160(columns[4], uint160_init((uint32_t[]){0, prev_col->blocks[0], prev_col->blocks[1], prev_col->blocks[2], prev_col->blocks[3]}));
+	uint32_t carry, overflow;
+	uint160_t * mul_result = uint160_init((uint32_t []){0, 0, 0, 0, 0});
 	
+	mul_uint32(x->blocks[4], y->blocks[4], &carry, &overflow);
+	uint160_t * col1 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[3], y->blocks[4], &carry, &overflow);
+	uint160_t * col2 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[4], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col2, mul_result);
 
-	uint32_t c1 = columns[0]->blocks[4];
-	uint32_t c2 = columns[1]->blocks[4];
-	uint32_t c3 = columns[2]->blocks[4];
-	uint32_t c4 = columns[3]->blocks[4];
-	uint32_t c5 = columns[4]->blocks[4];
+	mul_uint32(x->blocks[2], y->blocks[4], &carry, &overflow);
+	uint160_t * col3 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[3], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col3, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col3, mul_result);
 
-	return uint160_init((uint32_t[]){c5, c4, c3, c2, c1});
+	mul_uint32(x->blocks[1], y->blocks[4], &carry, &overflow);
+	uint160_t * col4 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[2], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+	mul_uint32(x->blocks[3], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[1], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col4, mul_result);
+
+	mul_uint32(x->blocks[0], y->blocks[4], &carry, &overflow);
+	uint160_t * col5 = uint160_init((uint32_t []){0, 0, 0, carry, overflow});
+	mul_uint32(x->blocks[1], y->blocks[3], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[2], y->blocks[2], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[3], y->blocks[1], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+	mul_uint32(x->blocks[4], y->blocks[0], &carry, &overflow);
+	mul_result->blocks[3] = carry;
+	mul_result->blocks[4] = overflow;
+	add_modifying(col5, mul_result);
+
+	uint160_t * col_shift = uint160_init((uint32_t[]){0, col1->blocks[0], col1->blocks[1], col1->blocks[2], col1->blocks[3]});
+	add_modifying(col2, col_shift);
+	col_shift->blocks[1] = col2->blocks[0];
+	col_shift->blocks[2] = col2->blocks[1];
+	col_shift->blocks[3] = col2->blocks[2];
+	col_shift->blocks[4] = col2->blocks[3];
+	
+	add_modifying(col3, uint160_init((uint32_t[]){0, col2->blocks[0], col2->blocks[1], col2->blocks[2], col2->blocks[3]}));
+	col_shift->blocks[1] = col3->blocks[0];
+	col_shift->blocks[2] = col3->blocks[1];
+	col_shift->blocks[3] = col3->blocks[2];
+	col_shift->blocks[4] = col3->blocks[3];
+	add_modifying(col4, uint160_init((uint32_t[]){0, col3->blocks[0], col3->blocks[1], col3->blocks[2], col3->blocks[3]}));
+
+	col_shift->blocks[1] = col4->blocks[0];
+	col_shift->blocks[2] = col4->blocks[1];
+	col_shift->blocks[3] = col4->blocks[2];
+	col_shift->blocks[4] = col4->blocks[3];
+	add_modifying(col5, uint160_init((uint32_t[]){0, col4->blocks[0], col4->blocks[1], col4->blocks[2], col4->blocks[3]}));
+	uint32_t c1 = col5->blocks[4], c2 = col4->blocks[4], c3 = col3->blocks[4], c4 = col2->blocks[4], c5 = col1->blocks[4];
+	free(col_shift);
+	free(col1);
+	free(col2);
+	free(col3);
+	free(col4);
+	free(col5);
+	x->blocks[0] = c1;
+	x->blocks[1] = c2;
+	x->blocks[2] = c3;
+	x->blocks[3] = c4;
+	x->blocks[4] = c5;
 }
 uint160_t * rshift_uint160(uint160_t * x, uint8_t y) {
 	if (y >= 160) {
@@ -142,6 +352,53 @@ uint160_t * rshift_uint160(uint160_t * x, uint8_t y) {
 
 	return uint160_init((uint32_t []){b0, b1, b2, b3, b4});
 }
+void rshift_modifying(uint160_t * x, uint8_t y) {
+	if (y >= 160) {
+		x->blocks[0] = 0;
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return;
+	}
+	if (y < 160 && y >= 128) {
+		x->blocks[4] = x->blocks[0];
+		x->blocks[3] = 0;
+		x->blocks[2] = 0;
+		x->blocks[1] = 0;
+		x->blocks[0] = 0;
+		return rshift_modifying(x, y - 128);
+	}
+	if (y < 128 && y >= 96) {
+		x->blocks[4] = x->blocks[1];
+		x->blocks[3] = x->blocks[0];
+		x->blocks[2] = 0;
+		x->blocks[1] = 0;
+		x->blocks[0] = 0;
+		return rshift_modifying(x, y - 96);
+	}
+	if (y < 96 && y >= 64) {
+		x->blocks[4] = x->blocks[2];
+		x->blocks[3] = x->blocks[1];
+		x->blocks[2] = x->blocks[0];
+		x->blocks[1] = 0;
+		x->blocks[0] = 0;
+		return rshift_modifying(x, y - 64);
+	}
+	if (y < 64 && y >= 32) {
+		x->blocks[4] = x->blocks[3];
+		x->blocks[3] = x->blocks[2];
+		x->blocks[2] = x->blocks[1];
+		x->blocks[1] = x->blocks[0];
+		x->blocks[0] = 0;
+		return rshift_modifying(x, y - 32);
+	}
+	x->blocks[4] = (x->blocks[4] >> y) | (x->blocks[3] << (32 - y));
+	x->blocks[3] = (x->blocks[3] >> y) | (x->blocks[2] << (32 - y));
+	x->blocks[2] = (x->blocks[2] >> y) | (x->blocks[1] << (32 - y));
+	x->blocks[1] = (x->blocks[1] >> y) | (x->blocks[0] << (32 - y));
+	x->blocks[0] = (x->blocks[0] >> y);
+}
 uint160_t * lshift_uint160(uint160_t * x, uint8_t y) {
 	if (y >= 160) {
 		return cast_to_uint160(0);
@@ -164,6 +421,53 @@ uint160_t * lshift_uint160(uint160_t * x, uint8_t y) {
 	uint32_t b1 = (x->blocks[1] << y) | (x->blocks[2] >> (32 - y));
 	uint32_t b0 = (x->blocks[0] << y) | (x->blocks[1] >> (32 - y));
 	return uint160_init((uint32_t []){b0, b1, b2, b3, b4});
+}
+void lshift_modifying(uint160_t * x, uint8_t y) {
+	if (y >= 160) {
+		x->blocks[0] = 0;
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return;
+	}
+	if (y < 160 && y >= 128) {
+		x->blocks[0] = x->blocks[4];
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return lshift_modifying(x, y - 128);
+	}
+	if (y < 128 && y >= 96) {
+		x->blocks[0] = x->blocks[3];
+		x->blocks[1] = x->blocks[4];
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return lshift_modifying(x, y - 96);
+	}
+	if (y < 96 && y >= 64) {
+		x->blocks[0] = x->blocks[2];
+		x->blocks[1] = x->blocks[3];
+		x->blocks[2] = x->blocks[4];
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return lshift_modifying(x, y - 64);
+	}
+	if (y < 64 && y >= 32) {
+		x->blocks[0] = x->blocks[1];
+		x->blocks[1] = x->blocks[2];
+		x->blocks[2] = x->blocks[3];
+		x->blocks[3] = x->blocks[4];
+		x->blocks[4] = 0;
+		return lshift_modifying(x, y - 32);
+	}
+	x->blocks[4] = x->blocks[4] << y;
+	x->blocks[3] = (x->blocks[3] << y) | (x->blocks[4] >> (32 - y));
+	x->blocks[2] = (x->blocks[2] << y) | (x->blocks[3] >> (32 - y));
+	x->blocks[1] = (x->blocks[1] << y) | (x->blocks[2] >> (32 - y));
+	x->blocks[0] = (x->blocks[0] << y) | (x->blocks[1] >> (32 - y));
 }
 uint160_t * and_uint160(uint160_t * x, uint160_t * y) {
 	return uint160_init((uint32_t []){
@@ -205,24 +509,71 @@ uint160_t * mod_uint160(uint160_t * x, uint160_t * y) {
 	uint160_t * half_x = rshift_uint160(_x, 1);
 	uint160_t * largest_y = uint160_init((uint32_t[]){0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0XFFFFFFFF});
 	while (!gte_uint160(_y, half_x) && !gte_uint160(_y, largest_y)) {
-		_y = lshift_uint160(_y, 1);
+		lshift_modifying(_y, 1);
 	}
+	free(largest_y);
+	free(half_x);
 
-	_y = rshift_uint160(_y, 1);
+	rshift_modifying(_y, 1);
 	
 	while (gt_uint160(_y, y)) {
 		while(gt_uint160(_x, _y)) {
-			_x = sub_uint160(_x, _y);
+			sub_modifying(_x, _y);
 		}
-		_y = rshift_uint160(_y, 1);
+		rshift_modifying(_y, 1);
 	}
+	free(_y);
 	while (gt_uint160(_x, y)) {
-		_x = sub_uint160(_x, y);
+		sub_modifying(_x, y);
 	}
 	if (equal_uint160(_x, y)) {
 		return cast_to_uint160(0);
 	}
 	return _x;
+}
+
+void mod_modifying(uint160_t * x, uint160_t * y) {
+	if (gt_uint160(y, x)) {
+		return;
+	}
+	if (equal_uint160(y, cast_to_uint160(1))) {
+		x->blocks[0] = 0;
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return ;
+	}
+	// uint160_t * _x = uint160_init(x->blocks);
+	uint160_t * _y = uint160_init(y->blocks);
+	uint160_t * half_x = rshift_uint160(x, 1);
+	uint160_t * largest_y = uint160_init((uint32_t[]){0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0XFFFFFFFF});
+	while (!gte_uint160(_y, half_x) && !gte_uint160(_y, largest_y)) {
+		lshift_modifying(_y, 1);
+	}
+	free(largest_y);
+	free(half_x);
+
+	rshift_modifying(_y, 1);
+	
+	while (gt_uint160(_y, y)) {
+		while(gt_uint160(x, _y)) {
+			sub_modifying(x, _y);
+		}
+		rshift_modifying(_y, 1);
+	}
+	free(_y);
+	while (gt_uint160(x, y)) {
+		sub_modifying(x, y);
+	}
+	if (equal_uint160(x, y)) {
+		x->blocks[0] = 0;
+		x->blocks[1] = 0;
+		x->blocks[2] = 0;
+		x->blocks[3] = 0;
+		x->blocks[4] = 0;
+		return;
+	}
 }
 
 uint8_t lt_uint160(uint160_t * x, uint160_t * y) {
