@@ -19,7 +19,7 @@ uint16_t count_num_bits(uint160_t* value){
             return i + 1;
         }
     }
-    // printf("Num bits: %d\n", count);
+    printf("Num bits: %d\n", count);
     return 0;
 }
 
