@@ -16,10 +16,10 @@ uint16_t count_num_bits(uint160_t* value){
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
         if (bit != 0) {
+			printf("Num bits: %d\n", count);
             return i + 1;
         }
     }
-    printf("Num bits: %d\n", count);
     return 0;
 }
 
