@@ -28,28 +28,11 @@ uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
     //keep all declarations outside of for loop
     register uint256_t * T = cast_to_uint256(0);
     register uint256_t * n = cast_to_uint256(0);
-    register uint8_t a=0;
-    register uint256_t * Xi;
-    uint256_t* oneCast = cast_to_uint256(1);
-    uint256_t* tAnd;
-    uint256_t* yAnd;
-    uint256_t* xyAnd;
-    uint256_t* xyMul;
-    uint256_t* mulAdd;
-    uint256_t* tmulAdd;
-    uint256_t* nmMul;
     //unroll all instructions to save register space
-    for(; a < bitLength; a++){
-        Xi = cast_to_uint256(get_bit(X, a));
-        tAnd = and_uint256(T, oneCast);
-        yAnd = and_uint256(Y, oneCast);
-        xyAnd = and_uint256(Xi, yAnd);
-        n = xor_uint256(tAnd, xyAnd);
-        xyMul = mul_uint256(Xi, Y);
-        nmMul = mul_uint256(n, M);
-        mulAdd = add_uint256(xyMul, nmMul);
-        tmulAdd = add_uint256(T, mulAdd);
-        T = rshift_uint256(tmulAdd, 1);
+    for(uint8_t a=0; a < bitLength; a++){
+        uint256_t * Xi = cast_to_uint256(get_bit(X, a));
+        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
+        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
     }
     if(gte_uint256(T, M)){
         T = sub_uint256(T, M);
