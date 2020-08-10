@@ -67,9 +67,11 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
     uint16_t mod_bits = count_num_bits(modulus);
     uint160_t* r_squared = cast_to_uint160(1);
     uint16_t a = 0;
+	printf("Calculating rsquared\n");
     for(; a < mod_bits*2; a++){
         r_squared = mod_uint160(mul_uint160(r_squared,cast_to_uint160(2)), modulus);
     }
+	printf("Calculating C and S\n");
 	uint160_t* C = mmm(cast_to_uint160(1), r_squared, modulus, mod_bits);
     uint160_t* S = mmm(message, r_squared, modulus, mod_bits);
 	printf("C and S calculated\n");
