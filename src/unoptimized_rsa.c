@@ -62,7 +62,6 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
 	if (uint256_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint8_t key_bits = count_num_bits(key);
     uint8_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
