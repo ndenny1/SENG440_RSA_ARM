@@ -50,7 +50,7 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
         mulAdd = add_uint160(xyMul, nmMul);
         tmulAdd = add_uint160(T, mulAdd);
         T = rshift_uint160(tmulAdd, 1);
-		printf("%d\n");
+		printf("%d\n", a);
     }
     if(gte_uint160(T, M)){T = sub_uint160(T, M);}
     return T;
