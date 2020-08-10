@@ -15,12 +15,13 @@ uint16_t count_num_bits(uint160_t* value){
     int i = 159;
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
-        if (bit != 0) {
-			printf("Num bits: %d\n", count);
-            return i + 1;
+        if (bit == 0 && count == 0) {
+            continue;
         }
+		count++;
     }
-    return 0;
+	printf("Num bits: %d\n", count);
+    return count;
 }
 
 //Montgomery Modular Multiplication
