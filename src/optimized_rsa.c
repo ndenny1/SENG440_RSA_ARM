@@ -24,7 +24,7 @@ uint16_t count_num_bits(uint160_t* value){
 }
 
 //Montgomery Modular Multiplication
-int mmm(int X, int Y, int M, int bitLength){
+uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, int bitLength){
     uint160_t * T = cast_to_uint160(0);
     uint160_t * n = cast_to_uint160(0);
 	int countdown = bitLength;
