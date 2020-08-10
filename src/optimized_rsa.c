@@ -24,7 +24,7 @@ uint16_t count_num_bits(uint160_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, int bitLength){
+uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
     uint160_t * T = cast_to_uint160(0);
     uint160_t * n = cast_to_uint160(0);
 	int countdown = bitLength;
@@ -32,7 +32,7 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, int bitLength){
 	//optimized for loop, remove declaration, change comparison to != instead of >, left shift for loop decrement
     for(; countdown !=0;countdown--, curBit <<= 1){
 		//could change to != 0
-        uint160_t * Xi = cast_to_uint160(get_bit(X. curBit));
+        uint160_t * Xi = cast_to_uint160(get_bit(X, curBit));
         n = xor_uint160(and_uint160(T, cast_to_uint160(1)), and_uint160(Xi, and_uint160(Y, cast_to_uint160(1))));
         T = rshift_uint160(add_uint160(T, add_uint160(mul_uint160(Xi, Y), mul_uint160(n, M))), 1);
     }
