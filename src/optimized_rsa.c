@@ -25,16 +25,29 @@ uint16_t count_num_bits(uint160_t* value){
 
 //Montgomery Modular Multiplication
 uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
-    uint160_t * T = cast_to_uint160(0);
-    uint160_t * n = cast_to_uint160(0);
-	int countdown = bitLength;
-	int curBit = 1;
-	//optimized for loop, remove declaration, change comparison to != instead of >, left shift for loop decrement
-    for(; countdown !=0;countdown--, curBit <<= 1){
-		//could change to != 0
-        uint160_t * Xi = cast_to_uint160(get_bit(X, curBit));
-        n = xor_uint160(and_uint160(T, cast_to_uint160(1)), and_uint160(Xi, and_uint160(Y, cast_to_uint160(1))));
-        T = rshift_uint160(add_uint160(T, add_uint160(mul_uint160(Xi, Y), mul_uint160(n, M))), 1);
+    register uint160_t * T = cast_to_uint160(0);
+    register uint160_t * n = cast_to_uint160(0);
+    register uint8_t a=0;
+    register uint160_t * Xi;
+    uint160_t* oneCast = cast_to_uint160(1);
+    uint160_t* tAnd;
+    uint160_t* yAnd;
+    uint160_t* xyAnd;
+    uint160_t* xyMul;
+    uint160_t* mulAdd;
+    uint160_t* tmulAdd;
+    uint160_t* nmMul;
+    for(; a < bitLength;a++){
+		Xi = cast_to_uint160(get_bit(X, a));
+        tAnd = and_uint160(T, oneCast);
+        yAnd = and_uint160(Y, oneCast);
+        xyAnd = and_uint160(Xi, yAnd);
+        n = xor_uint160(tAnd, xyAnd);
+        xyMul = mul_uint160(Xi, Y);
+        nmMul = mul_uint160(n, M);
+        mulAdd = add_uint160(xyMul, nmMul);
+        tmulAdd = add_uint160(T, mulAdd);
+        T = rshift_uint160(tmulAdd, 1);
     }
     if(gte_uint160(T, M)){T = sub_uint160(T, M);}
     return T;
