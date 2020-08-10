@@ -25,9 +25,9 @@ inline uint8_t count_num_bits(uint256_t* value){
 
 //Montgomery Modular Multiplication
 uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
+    //keep all declarations outside of for loop
     register uint256_t * T = cast_to_uint256(0);
     register uint256_t * n = cast_to_uint256(0);
-    //unroll all instructions to save register space
     register uint8_t a=0;
     register uint256_t * Xi;
     uint256_t* oneCast = cast_to_uint256(1);
@@ -62,7 +62,6 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
 	if (uint256_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint8_t key_bits = count_num_bits(key);
     uint8_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
@@ -71,8 +70,9 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
     }
 	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
     uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
+    uint8_t key_i;
     for (uint16_t i = 0; i < mod_bits; i++) {
-        uint8_t key_i = get_bit(key, i);
+        key_i = get_bit(key, i);
         if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
