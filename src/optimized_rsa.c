@@ -27,7 +27,7 @@ uint16_t count_num_bits(uint160_t* value){
 uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength){
     register uint160_t * T = cast_to_uint160(0);
     register uint160_t * n = cast_to_uint160(0);
-    register uint8_t a=0;
+    int a=0;
     register uint160_t * Xi;
     uint160_t* oneCast = cast_to_uint160(1);
     uint160_t* tAnd;
@@ -37,6 +37,7 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
     uint160_t* mulAdd;
     uint160_t* tmulAdd;
     uint160_t* nmMul;
+	printf("Starting MMM\n");
 	//optimized loop, decrement and compare with zero instead of increment and compare with int
 	// #pragma omp parallel
     for(; a < bitLength;a++){
@@ -71,6 +72,7 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
     }
 	uint160_t* C = mmm(cast_to_uint160(1), r_squared, modulus, mod_bits);
     uint160_t* S = mmm(message, r_squared, modulus, mod_bits);
+	printf("C and S calculated\n");
     uint16_t i = 0;
     for (; i < key_bits; i++) {
         uint8_t key_i = get_bit(key, i);
@@ -79,6 +81,7 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
         }
         S = mmm(S, S, modulus, mod_bits);
     }
+	printf("For loop complete\n");
     C = mmm(cast_to_uint160(1), C, modulus, mod_bits);
 	return C;
 }
