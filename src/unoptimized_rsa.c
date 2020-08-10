@@ -9,9 +9,8 @@ uint256_t * E;
 
 
 //used to count bitlength for Montgomery Modular Multiplication
-uint16_t count_num_bits(uint256_t* value){
-    uint16_t count = 0;
-    uint16_t block = 0;
+inline uint8_t count_num_bits(uint256_t* value){
+    uint8_t count = 0;
     int i = 255;
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
@@ -25,18 +24,37 @@ uint16_t count_num_bits(uint256_t* value){
 }
 
 //Montgomery Modular Multiplication
-uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint32_t bitLength){
-    uint256_t * T = cast_to_uint256(0);
-    uint256_t * n = cast_to_uint256(0);
-    //loop fusion not possible, nor loop fission
-    for(uint16_t a=0; a < bitLength; a++){
-        uint256_t * Xi = cast_to_uint256(get_bit(X, a));
-        n = xor_uint256(and_uint256(T, cast_to_uint256(1)), and_uint256(Xi, and_uint256(Y, cast_to_uint256(1))));
-        T = rshift_uint256(add_uint256(T, add_uint256(mul_uint256(Xi, Y), mul_uint256(n, M))), 1);
+uint256_t* mmm(uint256_t* X, uint256_t* Y, uint256_t* M, uint8_t bitLength){
+    //keep all declarations outside of for loop
+    register uint256_t * T = cast_to_uint256(0);
+    register uint256_t * n = cast_to_uint256(0);
+    register uint8_t a=0;
+    register uint256_t * Xi;
+    uint256_t* oneCast = cast_to_uint256(1);
+    uint256_t* tAnd;
+    uint256_t* yAnd;
+    uint256_t* xyAnd;
+    uint256_t* xyMul;
+    uint256_t* mulAdd;
+    uint256_t* tmulAdd;
+    uint256_t* nmMul;
+    //unroll all instructions to save register space
+    for(; a < bitLength; a++){
+        Xi = cast_to_uint256(get_bit(X, a));
+        tAnd = and_uint256(T, oneCast);
+        yAnd = and_uint256(Y, oneCast);
+        xyAnd = and_uint256(Xi, yAnd);
+        n = xor_uint256(tAnd, xyAnd);
+        xyMul = mul_uint256(Xi, Y);
+        nmMul = mul_uint256(n, M);
+        mulAdd = add_uint256(xyMul, nmMul);
+        tmulAdd = add_uint256(T, mulAdd);
+        T = rshift_uint256(tmulAdd, 1);
     }
-    if(gte_uint256(T, M)){T = sub_uint256(T, M);}
+    if(gte_uint256(T, M)){
+        T = sub_uint256(T, M);
+    }
     return T;
-
 }
 
 //Modular Exponentiation
@@ -44,8 +62,7 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
 	if (uint256_equal_to_zero(modulus)){
 		return 0;
 	}
-    uint16_t key_bits = count_num_bits(key);
-    uint16_t mod_bits = count_num_bits(modulus);
+    uint8_t mod_bits = count_num_bits(modulus);
     uint256_t* r_squared = cast_to_uint256(1);
     // uint256_t* r_squared = mod_uint256(cast_to_uint256((1 << (2*mod_bits))), modulus);
     for(uint16_t a = 0; a < mod_bits*2; a++){
@@ -53,8 +70,9 @@ uint256_t* me(uint256_t* message, uint256_t* key, uint256_t* modulus){
     }
 	uint256_t* C = mmm(cast_to_uint256(1), r_squared, modulus, mod_bits);
     uint256_t* S = mmm(message, r_squared, modulus, mod_bits);
+    uint8_t key_i;
     for (uint16_t i = 0; i < mod_bits; i++) {
-        uint8_t key_i = get_bit(key, i);
+        key_i = get_bit(key, i);
         if (key_i == 1) {
             C = mmm(C, S, modulus, mod_bits);
         }
