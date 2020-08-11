@@ -1,14 +1,8 @@
 /* file: unoptimized_rsa.h */
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <stdint.h>
 #include "int160.h"
-
-#ifndef bool
-	#include <stdbool.h>
-	#define bool	_Bool
-#endif
 
 uint16_t count_num_bits(uint160_t* value);
 

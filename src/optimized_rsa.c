@@ -11,7 +11,6 @@ uint160_t * E;
 //used to count bitlength for Montgomery Modular Multiplication
 uint16_t count_num_bits(uint160_t* value){
     uint16_t count = 0;
-    uint16_t block = 0;
     int i = 159;
     for (; i >= 0; i--) {
         uint8_t bit = get_bit(value, i);
@@ -76,7 +75,7 @@ uint160_t* me(uint160_t* message, uint160_t* key, uint160_t* modulus){
     uint160_t * r_squared = cast_to_uint160(1);
     uint160_t * one = cast_to_uint160(1);
     uint160_t * two = cast_to_uint160(2);
-    // uint160_t* r_squared = mod_uint160(cast_to_uint160((1 << (2*mod_bits))), modulus);
+
     uint16_t a = 0;
     for(; a < mod_bits*2; a++){
         mul_modifying(r_squared, two);
@@ -132,32 +131,6 @@ uint160_t* decrypt(uint160_t* encoded_message){
 
 
 int main() {
-
-    // print_uint160("x: ", x);
-    // print_uint160("y: ", y);
-    // print_uint160("x + y = ", add_uint160(x, y));
-    // print_uint160("x - y = ", sub_uint160(x, y));
-    // print_uint160("x * y = ", mul_uint160(x, y));
-    // print_uint160("x % y = ", mod_uint160(x, y));
-    // print_uint160("x << 54 = ", lshift_uint160(x, 54));
-    // print_uint160("x >> 54 = ", rshift_uint160(x, 54));
-    // uint16_t x_bits = count_num_bits(x);
-    // printf("x bits:\n");
-    // uint8_t i = 1;
-    // for (; i <= x_bits; i++){
-    //     if (i % 4 == 0) {
-    //         printf(" ");
-    //     }
-    //     uint8_t bit = get_bit(x, (x_bits - i));
-    //     printf("%u", bit);
-    // }
-    // printf("\n");
-    // uint160_t * x = uint160_init((uint32_t []){0, 0, 0, 0xFEDCBA98, 0x76543210});
-    // uint160_t * y = uint160_init((uint32_t []){0, 0, 0, 0x01234567, 0x89ABCDEF});
-    // uint160_t * mod = uint160_init((uint32_t []){0, 0, 0, 0xDEADBEEF, 0xDEADBEEF});
-    // printf("mod bits: %d\n", count_num_bits(mod));
-    // uint160_t * r = me(x, y, mod);
-    // print_uint160("me(x, y, mod) = ", r);
     uint32_t mes = 123456789;
     uint160_t* message = cast_to_uint160(mes);
     print_uint160("Initial Message: ", message);

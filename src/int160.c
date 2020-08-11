@@ -26,22 +26,6 @@ uint160_t * add_uint160(uint160_t * x, uint160_t * y) {
 		r_blocks[i] = ri;
 	}
 	return uint160_init(r_blocks);
-	// uint32_t b1, b2, b3, b4, b5;
-	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
-	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
-	
-	// // Needs to compile with -O3 flag
-	// __asm__ __volatile__ (
-	// 	"adds %4, %9, %14;\n"
-	// 	"\tadcs %3, %8, %13;\n"
-	// 	"\tadcs %2, %7, %12;\n"
-	// 	"\tadcs %1, %6, %11;\n"
-	// 	"\tadc %0, %5, %10;\n"
-	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
-	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
-	// );
-
-	// return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
 }
 
 void add_modifying(uint160_t * x, uint160_t * y) {
@@ -54,25 +38,6 @@ void add_modifying(uint160_t * x, uint160_t * y) {
 		carry = (ri < xi || ri < yi);
 		x->blocks[i] = ri;
 	}
-	// uint32_t b1, b2, b3, b4, b5;
-	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
-	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
-	
-	// // Needs to compile with -O3 flag
-	// __asm__ __volatile__ (
-	// 	"adds %4, %9, %14;\n"
-	// 	"\tadcs %3, %8, %13;\n"
-	// 	"\tadcs %2, %7, %12;\n"
-	// 	"\tadcs %1, %6, %11;\n"
-	// 	"\tadc %0, %5, %10;\n"
-	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
-	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
-	// );
-	// x->blocks[0] = b1;
-	// x->blocks[1] = b2;
-	// x->blocks[2] = b3;
-	// x->blocks[3] = b4;
-	// x->blocks[4] = b5;
 }
 
 uint160_t * sub_uint160(uint160_t * x, uint160_t * y) {
@@ -88,22 +53,6 @@ uint160_t * sub_uint160(uint160_t * x, uint160_t * y) {
 		r_blocks[i] = ri;
 	}
 	return uint160_init(r_blocks);
-	// uint32_t b1, b2, b3, b4, b5;
-	// uint32_t x1 = x->blocks[0], x2 = x->blocks[1], x3 = x->blocks[2], x4 = x->blocks[3], x5 = x->blocks[4];
-	// uint32_t y1 = y->blocks[0], y2 = y->blocks[1], y3 = y->blocks[2], y4 = y->blocks[3], y5 = y->blocks[4];
-	
-	// // Needs to compile with -O3 flag
-	// __asm__ __volatile__ (
-	// 	"subs %4, %9, %14;\n"
-	// 	"\tsbcs %3, %8, %13;\n"
-	// 	"\tsbcs %2, %7, %12;\n"
-	// 	"\tsbcs %1, %6, %11;\n"
-	// 	"\tsbc %0, %5, %10;\n"
-	// 	: "=r" (b1), "=r" (b2), "=r" (b3), "=r" (b4), "=r" (b5)
-	// 	: "r" (x1), "r" (x2), "r" (x3), "r" (x4), "r" (x5), "r" (y1), "r" (y2), "r" (y3), "r" (y4), "r" (y5)
-	// );
-
-	// return uint160_init((uint32_t []){b1, b2, b3, b4, b5});
 }
 
 void sub_modifying(uint160_t * x, uint160_t * y) {
@@ -544,7 +493,7 @@ void mod_modifying(uint160_t * x, uint160_t * y) {
 		x->blocks[4] = 0;
 		return ;
 	}
-	// uint160_t * _x = uint160_init(x->blocks);
+	
 	uint160_t * _y = uint160_init(y->blocks);
 	uint160_t * half_x = rshift_uint160(x, 1);
 	uint160_t * largest_y = uint160_init((uint32_t[]){0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0XFFFFFFFF});
