@@ -36,10 +36,8 @@ uint160_t * mmm(uint160_t * X, uint160_t * Y, uint160_t * M, uint32_t bitLength)
     uint160_t* mulAdd;
     uint160_t* tmulAdd;
     uint160_t* nmMul;
-    //optimized loop, decrement and compare with zero instead of increment and compare with int
-    // #pragma omp parallel
 	// #pragma HLS pipeline II=<int> enable_flush
-    #pragma omp parallel
+    // #pragma omp parallel
     for(; a < bitLength;a++){
         Xi = cast_to_uint160(get_bit(X, a));
         tAnd = and_uint160(T, oneCast);
